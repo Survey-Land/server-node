@@ -90,7 +90,9 @@ export class AuthController {
     }
   };
 
-  logout = (_: Request, res: Response): void => {
+  logout = (req: Request, res: Response): void => {
+    this.setLocale(req);
+
     res.json({ message: i18n.__("Logged out successfully") });
   };
 }

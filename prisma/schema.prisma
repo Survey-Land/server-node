@@ -23,11 +23,11 @@ type QuestionObject {
   questionText String
   type         QuestionType
   choices      String[]
-  isRequired   Boolean @default(false)
+  isRequired   Boolean      @default(false)
 }
 
 model User {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
   name            String?
   email           String   @unique
   password        String?
@@ -41,11 +41,12 @@ model User {
 }
 
 model Survey {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String   @db.ObjectId
+  id          String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String           @db.ObjectId
   title       String
   description String?
   deadline    DateTime?
+  cover       String?
   status      SurveyStatus     @default(draft)
   link        String?
   questions   QuestionObject[]
@@ -53,26 +54,28 @@ model Survey {
   updatedAt   DateTime         @updatedAt
   user        User             @relation(fields: [userId], references: [id])
   responses   Response[]
+
   @@index([userId])
 }
 
 model Response {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
-  surveyId         String   @db.ObjectId
-  respondentName   String?
-  respondentEmail  String?
-  answers          Json
-  submittedAt      DateTime @default(now())
-  survey           Survey   @relation(fields: [surveyId], references: [id])
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  surveyId        String   @db.ObjectId
+  respondentName  String?
+  respondentEmail String?
+  answers         Json
+  submittedAt     DateTime @default(now())
+  survey          Survey   @relation(fields: [surveyId], references: [id])
+
   @@index([surveyId])
 }
 
 model OTP {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String
   otpHash   String
   expiresAt DateTime
   createdAt DateTime @default(now())
-  @@index([expiresAt])
 
+  @@index([expiresAt])
 }
