@@ -1,0 +1,15 @@
+{
+	"User": "المستخدم",
+	"User registered successfully": "تم تسجيل المستخدم بنجاح",
+	"Logged in successfully": "تم تسجيل الدخول بنجاح",
+	"Logged out successfully": "تم تسجيل الخروج بنجاح",
+	"Incorrect email or password": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+	"User not found": "المستخدم غير موجود",
+	"Record": "السجل",
+	"Unique constraint failed, data already exists": "فشل القيد الفريد، البيانات موجودة بالفعل",
+	"%s not found": "%s غير موجود",
+	"Database error: %s": "خطأ في قاعدة البيانات: %s",
+	"Data validation error": "خطأ في التحقق من البيانات",
+	"Database connection error": "خطأ في الاتصال بقاعدة البيانات"
+  }
+  
