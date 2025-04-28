@@ -58,7 +58,14 @@ export class AuthController {
       const { email, password } = req.body;
 
       const user = await this.authService.login(email, password, lang);
-      const token = generateToken({
+
+      const accessToken = generateToken({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      });
+
+      const refreshToken = generateToken({
         id: user.id,
         email: user.email,
         role: user.role,
@@ -66,7 +73,8 @@ export class AuthController {
 
       res.json({
         message: i18n.__("Logged in successfully"),
-        token,
+        accessToken,
+        refreshToken,
         user: {
           id: user.id,
           email: user.email,
