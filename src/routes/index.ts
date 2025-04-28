@@ -7,5 +7,4 @@ const router = Router();
 // Register all routes
 router.use("/auth", authRouter);
 
-
 export default router;
