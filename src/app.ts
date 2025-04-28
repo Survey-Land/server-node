@@ -1,4 +1,5 @@
 import express, { Application } from "express";
+import cookieParser from "cookie-parser";
 import routes from "./routes";
 import morgan from "morgan";
 import { errorHandler } from "./middleware/errorMiddleware";
@@ -12,7 +13,7 @@ import dotenv from "dotenv";
 import limiterOptions from "./config/limiterOptions";
 import i18n from "i18n";
 import i18nConfig from "./config/i18n";
-import cookieParser from "cookie-parser";
+
 dotenv.config();
 
 export default class App {
@@ -20,7 +21,6 @@ export default class App {
 
   constructor() {
     this.app = express();
-
     this.configureCore();
     this.configureMiddlewares();
     this.configureRoutes();

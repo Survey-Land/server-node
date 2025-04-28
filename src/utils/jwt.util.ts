@@ -16,3 +16,8 @@ export function generateRefetchToken(payload: object): string {
 
   return jwt.sign(payload, process.env.REFRESH_TOKEN, { expiresIn: "30d" });
 }
+
+export function verifyRefreshToken(refreshToken: string) {
+  const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN as string);
+  return decoded;
+}

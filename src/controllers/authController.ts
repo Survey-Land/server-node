@@ -1,7 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import { AuthService } from "../services/authService";
-import { generateToken } from "../utils/jwt.util";
+import {
+  generateRefetchToken,
+  generateToken,
+  verifyRefreshToken,
+} from "../utils/jwt.util";
+import jwt from "jsonwebtoken";
 import i18n from "../config/i18n";
+import { error } from "console";
 
 export class AuthController {
   private authService = new AuthService();
@@ -65,22 +71,77 @@ export class AuthController {
         role: user.role,
       });
 
-      const refreshToken = generateToken({
+      const refreshToken = generateRefetchToken({
         id: user.id,
         email: user.email,
         role: user.role,
       });
 
+      const expiry = new Date();
+
+      expiry.setDate(expiry.getDate() + 7);
+
+      await this.authService.createRefreshToken(refreshToken, user.id, expiry);
+
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: false,
+        path: "/api/auth/refresh",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
       res.json({
         message: i18n.__("Logged in successfully"),
         accessToken,
-        refreshToken,
         user: {
           id: user.id,
           email: user.email,
           name: user.name,
           role: user.role,
         },
+      });
+    } catch (e) {
+      next(e);
+    }
+  };
+
+  refreshToken = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const refreshToken = req.cookies.refreshToken;
+
+      if (!refreshToken) {
+        throw new Error("Refresh token is missing.");
+      }
+
+      const tokenDoc = await this.authService.getRefreshTokenByToken(
+        refreshToken
+      );
+
+      if (!tokenDoc) {
+        throw new Error("Invalid refresh token.");
+      }
+
+      if (new Date(tokenDoc.expiresAt) < new Date()) {
+        throw new Error("Refresh token has expired. Please login again.");
+      }
+
+      const user = verifyRefreshToken(tokenDoc.token) as JwtPayload;
+
+      if (!user) {
+        throw new Error("Invalid refresh token payload.");
+      }
+
+      const accessToken = generateToken({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Access token refreshed successfully.",
+        accessToken,
       });
     } catch (e) {
       next(e);
