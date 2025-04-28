@@ -1,4 +1,5 @@
 {
+
 	"User": "المستخدم",
 	"User registered successfully": "تم تسجيل المستخدم بنجاح",
 	"Logged in successfully": "تم تسجيل الدخول بنجاح",
@@ -12,6 +13,17 @@
 	"%s not found": "%s غير موجود",
 	"Database error: %s": "خطأ في قاعدة البيانات: %s",
 	"Data validation error": "خطأ في التحقق من البيانات",
-	"Database connection error": "خطأ في الاتصال بقاعدة البيانات"
-  }
+	"Database connection error": "خطأ في الاتصال بقاعدة البيانات",
+	"Response": "الاستجابة",
+	"retrieve Responses": "تم ارجاع جميع الاستجابات",
+	"Response retrieved successfully": "تم ارجاع الاجبات بنجاح",
+	"Response created successfully": "تم إنشاء الاستجابة بنجاح",
+	"Response not found": "الاستجابة غير موجودة",
+	"Survey not found for response": "الاستبيان غير موجود للاستجابة",
+	"Failed to create response": "فشل في إنشاء الاستجابة",
+	"Response updated successfully": "تم تحديث الاستجابة بنجاح",
+	"Response deleted successfully": "تم حذف الاستجابة بنجاح",
+	"Error while processing response": "خطأ أثناء معالجة الاستجابة"
+}
+  
   
