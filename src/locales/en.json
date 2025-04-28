@@ -1,9 +1,19 @@
 {
-	"User": "User",
-	"User registered successfully": "User registered successfully",
-	"Logged in successfully": "Logged in successfully",
-	"Logged out successfully": "Logged out successfully",
-	"Incorrect email or password": "Incorrect email or password",
-	"User not found": "User not found"
-  }
-  
+  "User": "User",
+  "User registered successfully": "User registered successfully",
+  "Logged in successfully": "Logged in successfully",
+  "Logged out successfully": "Logged out successfully",
+  "Incorrect email or password": "Incorrect email or password",
+  "User not found": "User not found",
+  "Response": "Response",
+  "retrieve Responses": "retrieve all responses",
+  "Database error: %s": "Database error: %s",
+  "Response created successfully": "Response created successfully",
+  "Response not found": "Response not found",
+  "Survey not found for response": "Survey not found for response",
+  "Failed to create response": "Failed to create response",
+  "Response updated successfully": "Response updated successfully",
+  "Response deleted successfully": "Response deleted successfully",
+  "Error while processing response": "Error while processing response",
+  "Data validation error": "Data validation error"
+}
