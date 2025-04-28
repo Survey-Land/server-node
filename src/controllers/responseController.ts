@@ -10,6 +10,7 @@ export class ResponseController extends Controller {
   findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
       this.setLocale(req);
+
       const responses = await this.responseService.findAll(req.query);
       res.json(
         this.sendResponse(true, i18n.__("retrieve Responses"), responses)
@@ -18,7 +19,27 @@ export class ResponseController extends Controller {
       next(e);
     }
   };
+  getById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      this.setLocale(req);
+      const { id } = req.params;
+      const isExist = await this.responseService.findById(id);
 
+      if (!isExist) {
+        throw Error(i18n.__("Response not found"));
+      }
+
+      res.json(
+        this.sendResponse(
+          true,
+          i18n.__("Response retrieved successfully"),
+          isExist
+        )
+      );
+    } catch (e) {
+      next(e);
+    }
+  };
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
       this.setLocale(req);

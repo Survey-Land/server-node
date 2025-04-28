@@ -13,6 +13,7 @@
   "Database connection error": "خطأ في الاتصال بقاعدة البيانات",
   "Response": "الاستجابة",
   "retrieve Responses": "تم ارجاع جميع الاستجابات",
+  "Response retrieved successfully": "تم ارجاع الاجبات بنجاح",
   "Response created successfully": "تم إنشاء الاستجابة بنجاح",
   "Response not found": "الاستجابة غير موجودة",
   "Survey not found for response": "الاستبيان غير موجود للاستجابة",

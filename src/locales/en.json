@@ -13,6 +13,7 @@
   "Survey not found for response": "Survey not found for response",
   "Failed to create response": "Failed to create response",
   "Response updated successfully": "Response updated successfully",
+  "Response retrieved successfully": "Response retrieved successfully",
   "Response deleted successfully": "Response deleted successfully",
   "Error while processing response": "Error while processing response",
   "Data validation error": "Data validation error"

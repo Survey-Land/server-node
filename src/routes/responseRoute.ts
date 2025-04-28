@@ -9,6 +9,7 @@ const router = Router();
 const responseController = new ResponseController();
 
 router.get("/", authenticateJWT, responseController.findAll);
+router.get("/:id", authenticateJWT, responseController.getById);
 router.post(
   "/",
   authenticateJWT,
