@@ -25,6 +25,7 @@
   "devDependencies": {
     "@prisma/client": "^6.6.0",
     "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
     "@types/i18n": "^0.13.12",
@@ -44,6 +45,7 @@
     "@aws-sdk/lib-storage": "^3.797.0",
     "@faker-js/faker": "^9.7.0",
     "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",

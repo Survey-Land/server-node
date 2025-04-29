@@ -8,6 +8,7 @@ import passport from "passport";
 const router = Router();
 const authController = new AuthController();
 
+router.post("/refresh", authController.refreshToken);
 router.post("/register", validate(registerSchema), authController.register);
 router.post("/login", validate(loginSchema), authController.login);
 router.post("/logout", authenticateJWT, authController.logout);
