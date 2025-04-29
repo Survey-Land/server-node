@@ -1,0 +1,149 @@
+import { Request, Response, NextFunction } from "express";
+import ResponseService from "../services/responseService";
+import i18n from "../config/i18n";
+import { Prisma } from "@prisma/client";
+import Controller from "./controller";
+
+export class ResponseController extends Controller {
+  private responseService = new ResponseService();
+
+  findAll = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      this.setLocale(req);
+
+      const responses = await this.responseService.findAll(req.query);
+      res.json(
+        this.sendResponse(true, i18n.__("retrieve Responses"), responses)
+      );
+    } catch (e) {
+      next(e);
+    }
+  };
+  getById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      this.setLocale(req);
+      const { id } = req.params;
+      const isExist = await this.responseService.findById(id);
+
+      if (!isExist) {
+        throw Error(i18n.__("Response not found"));
+      }
+
+      res.json(
+        this.sendResponse(
+          true,
+          i18n.__("Response retrieved successfully"),
+          isExist
+        )
+      );
+    } catch (e) {
+      next(e);
+    }
+  };
+  create = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      this.setLocale(req);
+      const { surveyId, ...restData } = req.body;
+
+      const isSurveyIdExisted = await prisma?.survey.findUnique({
+        where: {
+          id: surveyId,
+        },
+      });
+
+      if (!isSurveyIdExisted) {
+        throw Error(i18n.__("Survey not found for response"));
+      }
+      const newResponse: Prisma.ResponseCreateInput = {
+        ...restData,
+        survey: {
+          connect: { id: surveyId },
+        },
+      };
+
+      const createdResponse = await this.responseService.create(newResponse);
+
+      res
+        .status(201)
+        .json(
+          this.sendResponse(
+            true,
+            i18n.__("Response created successfully"),
+            createdResponse
+          )
+        );
+    } catch (e) {
+      next(e);
+    }
+  };
+
+  update = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      this.setLocale(req);
+      const { id } = req.params;
+
+      const isExist = await this.responseService.findById(id);
+
+      if (!isExist) {
+        throw Error(i18n.__("Response not found"));
+      }
+
+      const { surveyId, ...restData } = req.body;
+
+      const isSurveyIdExisted = await prisma?.survey.findUnique({
+        where: {
+          id: surveyId,
+        },
+      });
+
+      if (!isSurveyIdExisted) {
+        throw Error(i18n.__("Survey not found for response"));
+      }
+      const newResponse: Prisma.ResponseCreateInput = {
+        ...restData,
+        survey: {
+          connect: { id: surveyId },
+        },
+      };
+
+      const updateResponse = await this.responseService.update(id, newResponse);
+
+      res
+        .status(201)
+        .json(
+          this.sendResponse(
+            true,
+            i18n.__("Response updated successfully"),
+            updateResponse
+          )
+        );
+    } catch (e) {
+      next(e);
+    }
+  };
+
+  deleteById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      this.setLocale(req);
+      const { id } = req.params;
+      const isExist = await this.responseService.findById(id);
+
+      if (!isExist) {
+        throw Error(i18n.__("Response not found"));
+      }
+      await this.responseService.deleteById(id);
+
+      res
+        .status(201)
+        .json(
+          this.sendResponse(
+            true,
+            i18n.__("Response deleted successfully"),
+            null
+          )
+        );
+    } catch (e) {
+      next(e);
+    }
+  };
+}

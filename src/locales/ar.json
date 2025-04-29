@@ -1,0 +1,29 @@
+{
+	"User": "المستخدم",
+	"User registered successfully": "تم تسجيل المستخدم بنجاح",
+	"Logged in successfully": "تم تسجيل الدخول بنجاح",
+	"Logged in successfully with Google": "تم تسجيل الدخول بنجاح باستخدام غوغل",
+	"Logged in successfully with GitHub": "تم تسجيل الدخول بنجاح باستخدام غيتهاب",
+	"Logged out successfully": "تم تسجيل الخروج بنجاح",
+	"Incorrect email or password": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+	"Authentication failed": "فشل المصادقة",
+	"User not found": "المستخدم غير موجود",
+	"Record": "السجل",
+	"Unique constraint failed, data already exists": "فشل القيد الفريد، البيانات موجودة بالفعل",
+	"%s not found": "%s غير موجود",
+	"Database error: %s": "خطأ في قاعدة البيانات: %s",
+	"Data validation error": "خطأ في التحقق من البيانات",
+	"Database connection error": "خطأ في الاتصال بقاعدة البيانات",
+	"Response": "الاستجابة",
+	"retrieve Responses": "تم ارجاع جميع الاستجابات",
+	"Response retrieved successfully": "تم ارجاع الاجابات بنجاح",
+	"Response created successfully": "تم إنشاء الاستجابة بنجاح",
+	"Response not found": "الاستجابة غير موجودة",
+	"Survey not found for response": "الاستبيان غير موجود للاستجابة",
+	"Failed to create response": "فشل في إنشاء الاستجابة",
+	"Response updated successfully": "تم تحديث الاستجابة بنجاح",
+	"Response deleted successfully": "تم حذف الاستجابة بنجاح",
+	"Error while processing response": "خطأ أثناء معالجة الاستجابة"
+}
+  
+  
