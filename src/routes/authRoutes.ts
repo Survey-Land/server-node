@@ -16,11 +16,6 @@ router.get("/users", authenticateJWT, authController.findAll);
 router.get("/google", authController.googleLogin);
 router.get("/google/callback", authController.googleCallback);
 router.get("/github", authController.githubLogin);
-// GitHub callback
-router.get(
-    "/github/callback",
-
-    authController.githubCallback
-);
+router.get("/github/callback", authController.githubCallback);
 
 export default router;
