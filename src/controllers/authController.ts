@@ -81,7 +81,7 @@ export class AuthController {
 
       expiry.setDate(expiry.getDate() + 7);
 
-      await this.authService.createRefreshToken(refreshToken, user.id, expiry);
+      // await this.authService.createRefreshToken(refreshToken, user.id, expiry);
 
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
@@ -114,19 +114,19 @@ export class AuthController {
         throw new Error("Refresh token is missing.");
       }
 
-      const tokenDoc = await this.authService.getRefreshTokenByToken(
-        refreshToken
-      );
+      // const tokenDoc = await this.authService.getRefreshTokenByToken(
+      //   refreshToken
+      // );
 
-      if (!tokenDoc) {
-        throw new Error("Invalid refresh token.");
-      }
+      // if (!tokenDoc) {
+      //   throw new Error("Invalid refresh token.");
+      // }
 
-      if (new Date(tokenDoc.expiresAt) < new Date()) {
-        throw new Error("Refresh token has expired. Please login again.");
-      }
+      // if (new Date(tokenDoc.expiresAt) < new Date()) {
+      //   throw new Error("Refresh token has expired. Please login again.");
+      // }
 
-      const user = verifyRefreshToken(tokenDoc.token) as JwtPayload;
+      const user = verifyRefreshToken(refreshToken) as JwtPayload;
 
       if (!user) {
         throw new Error("Invalid refresh token payload.");
