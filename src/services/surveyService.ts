@@ -5,17 +5,10 @@ import { CustomError } from '../utils/custom-error';
 import { handlePrismaError } from '../utils/prisma-error';
 import { processFilters, parseInclude, parseValue } from '../utils/query-parser';
 import i18n from '../config/i18n';
-import { console } from 'inspector';
 
 
 export class SurveyService {
-  /**
-  This Function is used to get all surveys by userId
-  @params query: any
-  @params lang: string
-  @params userId: string
-  @returns { data: any[], total: number, page: number, pageSize: number }
-  */
+ // This Function is used to get all surveys for specific user 
   async findAllByUser(query: any, userId: string, lang: string) {
     i18n.setLocale(lang);
     try {
@@ -47,12 +40,7 @@ export class SurveyService {
     }
   }
 
-  /**
-  This Function is used to create a survey
-  @params data: any
-  @params lang: string
-  @returns { data: any }  -> survey json
-  */
+  // This Function is used to create a new survey
   async createSurvey(data: any, lang: string) {
     i18n.setLocale(lang);
 
@@ -86,12 +74,7 @@ export class SurveyService {
     }
   }
 
-  /** 
-   This Function is used to get a survey by id, in order to publish the survey
-   @params id: string
-   @params lang: string
-   @returns { data: any }
-   */
+  // This Function is used to get a survey by id
   async getSurvey(id: string, lang: string) {
     i18n.setLocale(lang);
     try {
@@ -105,13 +88,8 @@ export class SurveyService {
     }
   }
 
-  /**
-    This Function is used to delete a survey by id
-    @params id: string
-    @params lang: string
-    @returns { data: any }
-   */
-
+  
+// This Function is used to delete a survey by id
   async deleteSurvey(id: string, lang: string) {
     i18n.setLocale(lang);
     try {
@@ -125,43 +103,40 @@ export class SurveyService {
     }
   }
 
-  /**
-  This Function is used to update a survey by id
-  @params id: string
-  @params lang: string
-  @params data: any
-  @returns { data: any }
-  */
+ // This Function is used to update a survey by id
   async updateSurvey(id: string, lang: string, data: any) {
-    console.log("hhhhh")
-
-    i18n.setLocale(lang); 
+    i18n.setLocale(lang);
+    const { questions, ...rest } = data;
+    const parsedQuestions = questions?.map((question: { isRequired: any }) => ({
+      ...question,
+      isRequired: parseValue(question.isRequired) ?? false,
+    })) || [];
+  
     try {
-        const existingSurvey = await prisma.survey.findUnique({ where: { id } });
-                if (!existingSurvey) {
-            throw new CustomError(i18n.__('Survey not found'), 404);
-        }
-
-        const updatedSurveyData: any = {
-            ...existingSurvey,
-            ...data,
-        };
-
-        delete updatedSurveyData.id;
-
-        const updatedSurvey = await prisma.survey.update({
-            where: { id },
-            data: updatedSurveyData,
-        });
-        return updatedSurvey;
+      const existingSurvey = await prisma.survey.findUnique({ where: { id } });
+      if (!existingSurvey) {
+        throw new CustomError(i18n.__('Survey not found'), 404);
+      }
+      const updatedSurveyData: any = {
+        ...existingSurvey,
+        ...rest,
+        questions: parsedQuestions, 
+      };
+      delete updatedSurveyData.id;   
+      const updatedSurvey = await prisma.survey.update({
+        where: { id },
+        data: updatedSurveyData,
+      });
+  
+      return updatedSurvey;
     } catch (error) {
-
-        if (error instanceof CustomError) {
-            throw error; 
-        } else {
-            throw new CustomError(i18n.__('An error occurred while updating the survey'), 500);
-        }
+      if (error instanceof CustomError) {
+        throw error;
+      } else {
+        throw new CustomError(i18n.__('An error occurred while updating the survey'), 500);
+      }
     }
-}
+  }
+  
 
 }
