@@ -23,7 +23,12 @@
 	"Failed to create response": "فشل في إنشاء الاستجابة",
 	"Response updated successfully": "تم تحديث الاستجابة بنجاح",
 	"Response deleted successfully": "تم حذف الاستجابة بنجاح",
-	"Error while processing response": "خطأ أثناء معالجة الاستجابة"
+	"Error while processing response": "خطأ أثناء معالجة الاستجابة",
+	"Survey created successfully": "تم إنشاء الاستبيان بنجاح",
+	"Survey updated successfully": "تم تعديل الاستبيان بنجاح",
+	"Survey deleted successfully": "تم حذف الاستبيان بنجاح",
+	"Survey not found": "الاستبيان غير موجود",
+	"Survey Creation Failed": "فشل في إنشاء الاستبيان",
+	"Survey": "الاستبيان",
+	"An error occurred while updating the survey": "حدث خطاء اثناء تحديث الاستبيان"
 }
-  
-  
