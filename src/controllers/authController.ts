@@ -126,7 +126,7 @@ export class AuthController {
   };
 
   githubLogin(req: Request, res: Response, next: NextFunction) {
-    passport.authenticate("github", { scope: ["user:email"] });
+    passport.authenticate("github", { scope: ["user:email"] })(req, res, next);
   }
   githubCallback = (req: Request, res: Response, next: Function) => {
     passport.authenticate(
