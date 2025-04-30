@@ -18,6 +18,13 @@
 	"Error while processing response": "Error while processing response",
 	"Data validation error": "Data validation error",
 	"Logged in successfully with Google": "Logged in successfully with Google",
-	"Authentication failed": "Authentication failed"
-  }
-  
+	"Authentication failed": "Authentication failed",
+	"Survey created successfully": "Survey created successfully",
+	"Survey updated successfully": "Survey updated successfully",
+	"Survey deleted successfully": "Survey deleted successfully",
+	"Survey not found": "Survey not found",
+	"Survey Creation Failed": "Survey Creation Failed",
+	"Survey": "Survey",
+	"Database connection error": "Database connection error",
+	"An error occurred while updating the survey":"Error occure while updating"
+}
