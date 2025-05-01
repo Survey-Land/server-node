@@ -1,6 +1,6 @@
 import prisma from '../lib/prisma';
-import { normalizeSurveyStatus, normalizeQuestionType } from '../utils/normalize';
-import { SurveyStatus, QuestionType } from '../constants/enums';
+import { normalizeSurveyStatus } from '../utils/normalize';
+import { SurveyStatus } from '../constants/enums';
 import { CustomError } from '../utils/custom-error';
 import { handlePrismaError } from '../utils/prisma-error';
 import { processFilters, parseInclude, parseValue } from '../utils/query-parser';
@@ -53,18 +53,9 @@ export class SurveyService {
         ? normalizeSurveyStatus(data.status)
         : SurveyStatus.Draft;
 
-      const mappedQuestions = data.questions?.map((q: any) => ({
-        qid: q.qid,
-        questionText: q.questionText,
-        type: q.type ? normalizeQuestionType(q.type) : QuestionType.Textarea,
-        choices: q.choices,
-        isRequired: parseValue(q.isRequired) ?? false,
-      }));
-
       const payload = {
         ...data,
         status: normalizedStatus,
-        questions: mappedQuestions,
         deadline: data.deadline ? new Date(data.deadline) : undefined,
       };
 
@@ -106,12 +97,6 @@ export class SurveyService {
  // This Function is used to update a survey by id
   async updateSurvey(id: string, lang: string, data: any) {
     i18n.setLocale(lang);
-    const { questions, ...rest } = data;
-    const parsedQuestions = questions?.map((question: { isRequired: any }) => ({
-      ...question,
-      isRequired: parseValue(question.isRequired) ?? false,
-    })) || [];
-  
     try {
       const existingSurvey = await prisma.survey.findUnique({ where: { id } });
       if (!existingSurvey) {
@@ -119,8 +104,7 @@ export class SurveyService {
       }
       const updatedSurveyData: any = {
         ...existingSurvey,
-        ...rest,
-        questions: parsedQuestions, 
+        ...data,
       };
       delete updatedSurveyData.id;   
       const updatedSurvey = await prisma.survey.update({
