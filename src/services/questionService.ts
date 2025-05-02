@@ -24,9 +24,16 @@ export class QuestionObjectService {
 
     if (!survey) throw new Error("Survey not found");
 
-    const updatedQuestions = survey.questions.map((q:QuestionObject) =>
-      q.qid === qid ? updatedQuestion : q
-    );
+    const updatedQuestions = survey.questions.map((q) => {
+      const question: QuestionObject = {
+        qid: q.qid,
+        questionText: q.questionText,
+        type: q.type as QuestionObject["type"],
+        choices: q.choices,
+        isRequired: q.isRequired,
+      };
+      return question.qid === qid ? updatedQuestion : question;
+    });
 
     return prisma.survey.update({
       where: { id: surveyId },
@@ -39,7 +46,15 @@ export class QuestionObjectService {
 
     if (!survey) throw new Error("Survey not found");
 
-    const updatedQuestions = survey.questions.filter((q:QuestionObject) => q.qid !== qid);
+    const updatedQuestions = survey.questions
+      .map((q) => ({
+        qid: q.qid,
+        questionText: q.questionText,
+        type: q.type as QuestionObject["type"],
+        choices: q.choices,
+        isRequired: q.isRequired,
+      }))
+      .filter((q: QuestionObject) => q.qid !== qid);
 
     return prisma.survey.update({
       where: { id: surveyId },
