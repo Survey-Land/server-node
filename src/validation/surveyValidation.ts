@@ -1,42 +1,5 @@
 import Joi from 'joi';
-import { QuestionType, SurveyStatus } from '../constants/enums';
-
-export const createQuestionSchema = Joi.object({
-  qid: Joi.string().required().messages({
-    'string.base': 'qid يجب أن يكون نصًا',
-    'any.required': 'qid مطلوب',
-  }),
-  questionText: Joi.string().required().messages({
-    'any.required': 'نص السؤال مطلوب',
-  }),
-  type: Joi.string()
-    .valid(...Object.values(QuestionType))
-    .optional()
-    .messages({
-      'any.only': 'نوع السؤال غير صالح',
-    }),
-  choices: Joi.array().items(Joi.string()).optional(),
-  isRequired: Joi.alternatives().try(
-    Joi.boolean(), Joi.string().valid('true', 'false')).optional(),
-});
-
-export const updateQuestionSchema = Joi.object({
-  qid: Joi.string().optional().messages({
-    'string.base': 'qid يجب أن يكون نصًا',
-  }),
-  questionText: Joi.string().optional().messages({
-    'string.base': 'نص السؤال يجب أن يكون نصًا',
-  }),
-  type: Joi.string()
-    .valid(...Object.values(QuestionType))
-    .optional()
-    .messages({
-      'any.only': 'نوع السؤال غير صالح',
-    }),
-  choices: Joi.array().items(Joi.string()).optional(),
-  isRequired: Joi.alternatives().try(
-    Joi.boolean(), Joi.string().valid('true', 'false')).optional(),
-});
+import {  SurveyStatus } from '../constants/enums';
 
 
 export const createSurveySchema = Joi.object({
@@ -59,7 +22,6 @@ export const createSurveySchema = Joi.object({
     .messages({
       'any.only': 'حالة الاستبيان غير صحيحة',
     }),
-  questions: Joi.array().items(createQuestionSchema).optional(),
 });
 
 export const updateSurveySchema = Joi.object({
@@ -77,5 +39,4 @@ export const updateSurveySchema = Joi.object({
     .messages({
       'any.only': 'حالة الاستبيان غير صحيحة',
     }),
-  questions: Joi.array().items(updateQuestionSchema).optional(),
 });

@@ -7,7 +7,7 @@ import { authenticateJWT } from '../middleware/authMiddleware';
 const router = Router();
 const controller = new SurveyController();
 
-router.get('/:userId', authenticateJWT, controller.getAllByUser); 
+router.get('/', authenticateJWT, controller.getAllByUser); 
 router.get('/:id',authenticateJWT, controller.getSurvey); 
 router.post('/', authenticateJWT,validate(createSurveySchema), controller.create);
 router.put('/:id',authenticateJWT,validate(updateSurveySchema), controller.update); 

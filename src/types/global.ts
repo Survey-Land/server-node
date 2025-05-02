@@ -1,3 +1,5 @@
+import { QuestionType } from "../constants/enums";
+
 export interface JwtPayload {
   id: string;
   email: string;
@@ -6,7 +8,7 @@ export interface JwtPayload {
 export type QuestionObject = {
   qid: string;
   questionText: string;
-  type: "mcq" | "textarea";
+  type: QuestionType;
   choices: string[];
   isRequired?: boolean; 
 };
