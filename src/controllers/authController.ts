@@ -9,8 +9,6 @@ import { setLocale, sendResponse } from "../utils/response";
 export class AuthController {
   private authService = new AuthService();
 
-
-
   findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const lang = setLocale(req);
@@ -21,27 +19,31 @@ export class AuthController {
     }
   };
 
-  registerInit = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const lang = setLocale(req);
-      const { email, password, name } = req.body;
-      await this.authService.registerInit({ email, password, name }, lang);
+registerInit = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const lang = setLocale(req);
+    const { email, password, name } = req.body;
 
-      res
-        .status(202)
-        .json(
-          sendResponse(
-            true,
-            i18n.__("OTP sent to your email. Please verify to complete registration"),
-            null
-          )
-        );
-    } catch (err) {
-      next(err);
-    }
-  };
+    const { user, mailSent } = await this.authService.registerInit(
+      { email, password, name },
+      lang
+    );
 
-  /** POST /auth/register/verify */
+    res.status(202).json(
+      sendResponse(
+        true,
+        mailSent
+          ? i18n.__("OTP sent to your email")
+          : i18n.__("OTP created but email failed; please use /otp/resend"),
+        null
+      )
+    );
+  } catch (err) {
+    next(err);
+  }
+};
+
+
   registerVerify = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const lang = setLocale(req);
@@ -54,19 +56,29 @@ export class AuthController {
         role: user.role,
       });
 
-      res
-        .status(201)
-        .json(
-          sendResponse(true, i18n.__("Registration complete"), {
-            token,
-            user: {
-              id: user.id,
-              email: user.email,
-              name: user.name,
-              role: user.role,
-            },
-          })
-        );
+      res.status(201).json(
+        sendResponse(true, i18n.__("Registration complete"), {
+          token,
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          },
+        })
+      );
+    } catch (err) {
+      next(err);
+    }
+  };
+  resendOtp = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const lang = setLocale(req);
+      const { email } = req.body;
+
+      await this.authService.resendOtp(email, lang);
+
+      res.json(sendResponse(true, i18n.__("OTP resent to your email"), null));
     } catch (err) {
       next(err);
     }

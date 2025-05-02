@@ -49,8 +49,14 @@ export class SurveyController {
 
     public async create(req: Request, res: Response, next: NextFunction) {
         try {
+            const user = req.user as User;
+            if (!user) {
+                res.status(401).json({ message: 'Unauthorized' });
+                return;
+            }
+            const userId = user.id as string;
             const lang = this.setLocale(req);
-            const survey = await this.surveyService.createSurvey(req.body, lang);
+            const survey = await this.surveyService.createSurvey(req.body, lang, userId);
             res.status(201).json({ message: i18n.__('Survey created successfully'), data: survey });
         } catch (error) {
             next(error);

@@ -30,5 +30,14 @@
 	"Survey not found": "الاستبيان غير موجود",
 	"Survey Creation Failed": "فشل في إنشاء الاستبيان",
 	"Survey": "الاستبيان",
-	"An error occurred while updating the survey": "حدث خطاء اثناء تحديث الاستبيان"
+	"An error occurred while updating the survey": "حدث خطاء اثناء تحديث الاستبيان",
+	"Verify your email": "Verify your email",
+	"valid for %s minutes": "valid for %s minutes",
+	"OTP sent to your email. Please verify to complete registration": "OTP sent to your email. Please verify to complete registration",
+	"OTP sent to your email": "OTP sent to your email",
+	"OTP resent to your email": "OTP resent to your email",
+	"Registration complete": "Registration complete",
+	"Invalid request": "Invalid request",
+	"Email already in use": "Email already in use",
+	"Survey creation failed": "Survey creation failed"
 }

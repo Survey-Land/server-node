@@ -3,10 +3,7 @@ import {  SurveyStatus } from '../constants/enums';
 
 
 export const createSurveySchema = Joi.object({
-  userId: Joi.string().required().messages({
-    'string.base': 'userId يجب أن يكون نصًا',
-    'any.required': 'userId مطلوب',
-  }),
+ 
   title: Joi.string().required().messages({
     'string.base': 'العنوان يجب أن يكون نصًا',
     'any.required': 'العنوان مطلوب',
@@ -22,6 +19,8 @@ export const createSurveySchema = Joi.object({
     .messages({
       'any.only': 'حالة الاستبيان غير صحيحة',
     }),
+    image: Joi.string().optional(),
+
 });
 
 export const updateSurveySchema = Joi.object({
@@ -39,4 +38,7 @@ export const updateSurveySchema = Joi.object({
     .messages({
       'any.only': 'حالة الاستبيان غير صحيحة',
     }),
+
+    image: Joi.string().optional(),
+
 });

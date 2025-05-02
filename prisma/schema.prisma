@@ -72,7 +72,7 @@ model Response {
 
 model OTP {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  email     String
+  email     String    @unique
   otpHash   String
   expiresAt DateTime
   createdAt DateTime @default(now())

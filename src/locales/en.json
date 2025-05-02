@@ -26,6 +26,14 @@
 	"Survey Creation Failed": "Survey Creation Failed",
 	"Survey": "Survey",
 	"Database connection error": "Database connection error",
-	"An error occurred while updating the survey":"Error occure while updating"
+	"An error occurred while updating the survey": "Error occure while updating",
+	"Verify your email": "Verify your email",
+	"valid for %s minutes": "valid for %s minutes",
+	"OTP sent to your email. Please verify to complete registration": "OTP sent to your email. Please verify to complete registration",
+	"OTP sent to your email": "OTP sent to your email",
+	"OTP resent to your email": "OTP resent to your email",
+	"Registration complete": "Registration complete",
+	"Invalid request": "Invalid request",
+	"Email already in use": "Email already in use",
+	"Survey creation failed": "Survey creation failed"
 }
-

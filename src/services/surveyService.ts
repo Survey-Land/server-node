@@ -41,10 +41,10 @@ export class SurveyService {
   }
 
   // This Function is used to create a new survey
-  async createSurvey(data: any, lang: string) {
+  async createSurvey(data: any, lang: string, userId: string) {
     i18n.setLocale(lang);
 
-    if (!data.userId || !data.title) {
+    if (!data.title) {
       throw new CustomError(i18n.__('Survey creation failed'), 400);
     }
 
@@ -54,8 +54,11 @@ export class SurveyService {
         : SurveyStatus.Draft;
 
       const payload = {
-        ...data,
+        title: data.title,
+        description: data.description,
+        ...(data.image !== undefined ? { cover:data.image } : {}),
         status: normalizedStatus,
+        userId,
         deadline: data.deadline ? new Date(data.deadline) : undefined,
       };
 

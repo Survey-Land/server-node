@@ -4,3 +4,7 @@ export enum SurveyStatus {
     Closed = 'closed',
   }
   
+  export enum QuestionType {
+    Mcq = 'mcq',
+    Textarea = 'textarea',
+  }
