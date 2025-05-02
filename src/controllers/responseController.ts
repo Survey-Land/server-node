@@ -62,7 +62,7 @@ export class ResponseController {
       };
 
       const createdResponse = await this.responseService.create(newResponse);
-
+      await this.responseService.checkSurveyMilestone(surveyId);
       res
         .status(201)
         .json(
