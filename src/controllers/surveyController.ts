@@ -1,6 +1,7 @@
 import {SurveyService} from "../services/surveyService";
 import { Request, Response, NextFunction } from 'express'
 import i18n from '../config/i18n'
+import { User } from "@prisma/client";
 
 
 export class SurveyController {
@@ -19,15 +20,22 @@ export class SurveyController {
         return lang;
     }
 
-    public async getAllByUser(req: Request, res: Response, next: NextFunction) {
+    public async getAllByUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
+            const user = req.user as User;
+            if (!user) {
+                res.status(401).json({ message: 'Unauthorized' });
+                return;
+            }
+            const userId = user.id as string;
             const lang = this.setLocale(req);
-            const surveys = await this.surveyService.findAllByUser(req.query, req.params.userId, lang);
+            const surveys = await this.surveyService.findAllByUser(req.query, userId, lang);
             res.status(200).json(surveys);
         } catch (error) {
             next(error);
         }
     }
+    
 
     public async getSurvey(req: Request, res: Response, next: NextFunction) {
         try {

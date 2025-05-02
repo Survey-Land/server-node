@@ -1,4 +1,4 @@
-import { SurveyStatus, QuestionType } from '../constants/enums';
+import { SurveyStatus } from '../constants/enums';
 
 export function normalizeSurveyStatus(value: string): SurveyStatus {
   const normalized = value.toLowerCase();
@@ -8,10 +8,3 @@ export function normalizeSurveyStatus(value: string): SurveyStatus {
   return normalized as SurveyStatus;
 }
 
-export function normalizeQuestionType(value : String) : QuestionType {
-  const normalized = value.toLowerCase();
-  if (!Object.values(QuestionType).includes(normalized as QuestionType)) {
-    throw new Error(`Invalid question type: ${value}`);
-  }
-  return normalized as QuestionType;
-}
