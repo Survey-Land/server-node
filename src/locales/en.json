@@ -35,5 +35,10 @@
 	"Registration complete": "Registration complete",
 	"Invalid request": "Invalid request",
 	"Email already in use": "Email already in use",
-	"Survey creation failed": "Survey creation failed"
+	"Survey creation failed": "Survey creation failed",
+	"OTP created but email failed; please use /otp/resend": "OTP created but email failed; please use /otp/resend",
+	"No OTP found, please request one": "No OTP found, please request one",
+	"OTP expired, request a new one": "OTP expired, request a new one",
+	"Invalid OTP": "Invalid OTP",
+	"Access token refreshed successfully.": "Access token refreshed successfully."
 }
