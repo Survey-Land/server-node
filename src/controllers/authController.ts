@@ -4,19 +4,16 @@ import { generateToken, verifyRefreshToken } from "../utils/jwt.util";
 import i18n from "../config/i18n";
 import passport from "passport";
 import { JwtPayload } from "../types/global";
+import { setLocale, sendResponse } from "../utils/response";
 
 export class AuthController {
   private authService = new AuthService();
 
-  private setLocale(req: Request) {
-    const lang = req.headers["accept-language"] || "ar";
-    i18n.setLocale(lang as string);
-    return lang;
-  }
+
 
   findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const lang = this.setLocale(req);
+      const lang = setLocale(req);
       const users = await this.authService.findAll(req.query, lang);
       res.json(users);
     } catch (e) {
@@ -24,37 +21,60 @@ export class AuthController {
     }
   };
 
-  register = async (req: Request, res: Response, next: NextFunction) => {
+  registerInit = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const lang = this.setLocale(req);
+      const lang = setLocale(req);
       const { email, password, name } = req.body;
-      const user = await this.authService.register(
-        { email, password, name },
-        lang
-      );
+      await this.authService.registerInit({ email, password, name }, lang);
+
+      res
+        .status(202)
+        .json(
+          sendResponse(
+            true,
+            i18n.__("OTP sent to your email. Please verify to complete registration"),
+            null
+          )
+        );
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /** POST /auth/register/verify */
+  registerVerify = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const lang = setLocale(req);
+      const { email, otp } = req.body;
+
+      const user = await this.authService.verifyOtp({ email, otp }, lang);
       const token = generateToken({
         id: user.id,
         email: user.email,
         role: user.role,
       });
-      res.status(201).json({
-        message: i18n.__("User registered successfully"),
-        token,
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        },
-      });
-    } catch (e) {
-      next(e);
+
+      res
+        .status(201)
+        .json(
+          sendResponse(true, i18n.__("Registration complete"), {
+            token,
+            user: {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+            },
+          })
+        );
+    } catch (err) {
+      next(err);
     }
   };
 
   login = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const lang = this.setLocale(req);
+      const lang = setLocale(req);
       const { email, password } = req.body;
       const user = await this.authService.login(email, password, lang);
       const token = generateToken({
@@ -79,7 +99,7 @@ export class AuthController {
 
   profile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      this.setLocale(req);
+      setLocale(req);
       const { id } = req.user as { id: string };
       const profile = await this.authService.getProfile(id);
       res.json(profile);
@@ -89,7 +109,7 @@ export class AuthController {
   };
 
   logout = (_req: Request, res: Response) => {
-    this.setLocale(_req);
+    setLocale(_req);
     res.json({ message: i18n.__("Logged out successfully") });
   };
 

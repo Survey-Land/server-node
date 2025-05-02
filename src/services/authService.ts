@@ -4,7 +4,13 @@ import { CustomError } from '../utils/custom-error'
 import { handlePrismaError } from '../utils/prisma-error'
 import { processFilters, parseInclude } from '../utils/query-parser'
 import i18n from '../config/i18n'
-
+import {
+  generateOtp,
+  hashOtp,
+  getExpiry,
+  compareOtp,
+} from "../utils/otp-generation";
+import { sendOtpEmail } from '../lib/emailService'
 export class AuthService {
   async findAll(query: any, lang: string) {
     i18n.setLocale(lang)
@@ -29,15 +35,78 @@ export class AuthService {
     }
   }
 
-  async register(data: { email: string; password?: string; name?: string }, lang: string) {
-    i18n.setLocale(lang)
-    try {
-      const hashed = data.password ? await bcrypt.hash(data.password, 10) : undefined
-      return prisma.user.create({ data: { ...data, password: hashed, provider: 'local', role: 'user' } })
-    } catch (e) {
-      handlePrismaError(e, i18n.__('User'))
-    }
+  async registerInit(
+    { email, password, name }: { email: string; password: string; name: string },
+    lang: string
+  ) {
+    i18n.setLocale(lang);
+
+    const existing = await prisma.user.findUnique({ where: { email } });
+
+    if (existing && existing.isEmailVerified)
+      throw new Error(i18n.__("Email already in use"));
+
+    const hashedPw = await bcrypt.hash(password, 10);
+
+    const user =
+      existing ??
+      (await prisma.user.create({
+        data: {
+          email,
+          name,
+          password: hashedPw,
+          provider: "local",
+          role: "user",
+          isEmailVerified: false,
+        },
+      }));
+
+    const otp = generateOtp();
+    const otpHash = await hashOtp(otp);
+
+    await prisma.oTP.create({
+      data: {
+        email,
+        otpHash,
+        expiresAt: getExpiry(5),
+      },
+    });
+
+    await sendOtpEmail(
+      email,
+      i18n.__("Verify your email"),
+      otp,
+      i18n.__("valid for %s minutes", (5).toString())
+    );
+
+    return user;   
   }
+
+  async verifyOtp(
+    { email, otp }: { email: string; otp: string },
+    lang: string
+  ) {
+    i18n.setLocale(lang);
+    const otpRecord = await prisma.oTP.findFirst({ where: { email } });
+
+    if (!otpRecord) throw new Error(i18n.__("No OTP found, please request one"));
+
+    if (otpRecord.expiresAt < new Date())
+      throw new Error(i18n.__("OTP expired, request a new one"));
+
+    const match = await compareOtp(otp, otpRecord.otpHash);
+    if (!match) throw new Error(i18n.__("Invalid OTP"));
+
+    const user = await prisma.user.update({
+      where: { email },
+      data: { isEmailVerified: true },
+    });
+
+    await prisma.oTP.delete({ where: { id: otpRecord.id } });
+
+    return user;
+  }
+
 
   async login(email: string, password: string, lang: string) {
     i18n.setLocale(lang)
