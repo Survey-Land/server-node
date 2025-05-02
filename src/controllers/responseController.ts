@@ -2,18 +2,18 @@ import { Request, Response, NextFunction } from "express";
 import ResponseService from "../services/responseService";
 import i18n from "../config/i18n";
 import { Prisma } from "@prisma/client";
-import Controller from "./controller";
+import { setLocale, sendResponse } from "../utils/response";
 
-export class ResponseController extends Controller {
+export class ResponseController {
   private responseService = new ResponseService();
 
   findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      this.setLocale(req);
+      setLocale(req);
 
       const responses = await this.responseService.findAll(req.query);
       res.json(
-        this.sendResponse(true, i18n.__("retrieve Responses"), responses)
+        sendResponse(true, i18n.__("retrieve Responses"), responses)
       );
     } catch (e) {
       next(e);
@@ -21,7 +21,7 @@ export class ResponseController extends Controller {
   };
   getById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      this.setLocale(req);
+      setLocale(req);
       const { id } = req.params;
       const isExist = await this.responseService.findById(id);
 
@@ -30,7 +30,7 @@ export class ResponseController extends Controller {
       }
 
       res.json(
-        this.sendResponse(
+        sendResponse(
           true,
           i18n.__("Response retrieved successfully"),
           isExist
@@ -42,7 +42,7 @@ export class ResponseController extends Controller {
   };
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      this.setLocale(req);
+      setLocale(req);
       const { surveyId, ...restData } = req.body;
 
       const isSurveyIdExisted = await prisma?.survey.findUnique({
@@ -66,7 +66,7 @@ export class ResponseController extends Controller {
       res
         .status(201)
         .json(
-          this.sendResponse(
+          sendResponse(
             true,
             i18n.__("Response created successfully"),
             createdResponse
@@ -79,7 +79,7 @@ export class ResponseController extends Controller {
 
   update = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      this.setLocale(req);
+      setLocale(req);
       const { id } = req.params;
 
       const isExist = await this.responseService.findById(id);
@@ -111,7 +111,7 @@ export class ResponseController extends Controller {
       res
         .status(201)
         .json(
-          this.sendResponse(
+          sendResponse(
             true,
             i18n.__("Response updated successfully"),
             updateResponse
@@ -124,7 +124,7 @@ export class ResponseController extends Controller {
 
   deleteById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      this.setLocale(req);
+      setLocale(req);
       const { id } = req.params;
       const isExist = await this.responseService.findById(id);
 
@@ -136,7 +136,7 @@ export class ResponseController extends Controller {
       res
         .status(201)
         .json(
-          this.sendResponse(
+          sendResponse(
             true,
             i18n.__("Response deleted successfully"),
             null
