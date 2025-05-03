@@ -4,8 +4,16 @@ import { CustomError } from '../utils/custom-error'
 import { handlePrismaError } from '../utils/prisma-error'
 import { processFilters, parseInclude } from '../utils/query-parser'
 import i18n from '../config/i18n'
-
+import {
+  generateOtp,
+  hashOtp,
+  getExpiry,
+  compareOtp,
+} from "../utils/otp-generation";
+import { sendOtpEmail } from '../lib/emailService'
+import logger from '../lib/logger'
 export class AuthService {
+
   async findAll(query: any, lang: string) {
     i18n.setLocale(lang)
     try {
@@ -29,16 +37,6 @@ export class AuthService {
     }
   }
 
-  async register(data: { email: string; password?: string; name?: string }, lang: string) {
-    i18n.setLocale(lang)
-    try {
-      const hashed = data.password ? await bcrypt.hash(data.password, 10) : undefined
-      return prisma.user.create({ data: { ...data, password: hashed, provider: 'local', role: 'user' } })
-    } catch (e) {
-      handlePrismaError(e, i18n.__('User'))
-    }
-  }
-
   async login(email: string, password: string, lang: string) {
     i18n.setLocale(lang)
     const user = await prisma.user.findUnique({ where: { email } })
@@ -48,6 +46,112 @@ export class AuthService {
     return user
   }
 
+  async registerInit(
+    { email, password, name }: { email: string; password: string; name: string },
+    lang: string
+  ) {
+    i18n.setLocale(lang);
+  
+    const { user, otpPlain } = await prisma.$transaction(async (tx) => {
+      const existing = await tx.user.findUnique({ where: { email } });
+      if (existing?.isEmailVerified)
+        throw new Error(i18n.__("Email already in use"));
+  
+      const hashedPw = await bcrypt.hash(password, 10);
+  
+      const user =
+        existing ??
+        (await tx.user.create({
+          data: {
+            email,
+            name,
+            password: hashedPw,
+            provider: "local",
+            role: "user",
+            isEmailVerified: false,
+          },
+        }));
+  
+      const otpPlain = generateOtp();
+      const otpHash  = await hashOtp(otpPlain);
+  
+      await tx.oTP.upsert({
+        where: { email },               
+        update: { otpHash, expiresAt: getExpiry(5) },
+        create: { email, otpHash, expiresAt: getExpiry(5) },
+      });
+  
+      return { user, otpPlain };
+    });
+  
+    try {
+      await sendOtpEmail(
+        email,
+        i18n.__("Verify your email"),
+        otpPlain,
+        i18n.__("valid for %s minutes", "5")
+      );
+  
+      return { user, mailSent: true };
+    } catch (err) {
+      logger.error("OTP email failed", { email, err: (err as Error).message });
+      return { user, mailSent: false };
+    }
+  }
+  
+  async verifyOtp(
+    { email, otp }: { email: string; otp: string },
+    lang: string
+  ) {
+    i18n.setLocale(lang);
+
+    return prisma.$transaction(async (tx) => {
+      const otpRecord = await tx.oTP.findFirst({ where: { email } });
+      if (!otpRecord)
+        throw new Error(i18n.__("No OTP found, please request one"));
+
+      if (otpRecord.expiresAt < new Date())
+        throw new Error(i18n.__("OTP expired, request a new one"));
+
+      const match = await compareOtp(otp, otpRecord.otpHash);
+      if (!match) throw new Error(i18n.__("Invalid OTP"));
+
+      const user = await tx.user.update({
+        where: { email },
+        data: { isEmailVerified: true },
+      });
+
+      await tx.oTP.delete({ where: { id: otpRecord.id } });
+
+      return user;
+    });
+  }
+
+  async resendOtp(email: string, lang: string) {
+    i18n.setLocale(lang);
+  
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || user.isEmailVerified)
+      throw new Error(i18n.__("Invalid request"));
+  
+    const otpPlain = generateOtp();
+    const otpHash  = await hashOtp(otpPlain);
+  
+    await prisma.oTP.upsert({
+      where: { email },                   
+      update: { otpHash, expiresAt: getExpiry(5) },
+      create: { email, otpHash, expiresAt: getExpiry(5) },
+    });
+    
+  
+    await sendOtpEmail(
+      email,
+      i18n.__("Verify your email"),
+      otpPlain,
+      i18n.__("valid for %s minutes", "5")
+    );
+  }
+  
   async getProfile(id: string) {
     const user = await prisma.user.findUnique({ where: { id } ,
       select: {
