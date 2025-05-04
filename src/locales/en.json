@@ -40,5 +40,7 @@
 	"No OTP found, please request one": "No OTP found, please request one",
 	"OTP expired, request a new one": "OTP expired, request a new one",
 	"Invalid OTP": "Invalid OTP",
-	"Access token refreshed successfully.": "Access token refreshed successfully."
+	"Access token refreshed successfully.": "Access token refreshed successfully.",
+	"Password is required":"Password is required",
+	"Password reset successfully":"Password reset successfully"
 }

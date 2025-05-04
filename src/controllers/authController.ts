@@ -5,6 +5,7 @@ import i18n from "../config/i18n";
 import passport from "passport";
 import { JwtPayload } from "../types/global";
 import { setLocale, sendResponse } from "../utils/response";
+import { User } from "@prisma/client";
 
 export class AuthController {
   private authService = new AuthService();
@@ -19,30 +20,35 @@ export class AuthController {
     }
   };
 
-registerInit = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const lang = setLocale(req);
-    const { email, password, name } = req.body;
+  registerInit = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const lang = setLocale(req);
+      const { email, password, name } = req.body;
 
-    const { user, mailSent } = await this.authService.registerInit(
-      { email, password, name },
-      lang
-    );
+      const { user, mailSent } = await this.authService.registerInit(
+        { email, password, name },
+        lang
+      );
 
-    res.status(202).json(
-      sendResponse(
-        true,
-        mailSent
-          ? i18n.__("OTP sent to your email")
-          : i18n.__("OTP created but email failed; please use /otp/resend"),
-        null
-      )
-    );
-  } catch (err) {
-    next(err);
-  }
-};
-
+      res
+        .status(202)
+        .json(
+          sendResponse(
+            true,
+            mailSent
+              ? i18n.__("OTP sent to your email")
+              : i18n.__("OTP created but email failed; please use /otp/resend"),
+            null
+          )
+        );
+    } catch (err) {
+      next(err);
+    }
+  };
 
   registerVerify = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -218,6 +224,26 @@ registerInit = async (req: Request, res: Response, next: NextFunction): Promise<
       });
     } catch (e) {
       next(e);
+    }
+  };
+  resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      setLocale(req);
+      const user = req.user as User;
+      const { newPassword } = req.body;
+      if (!user) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+      const userId = user.id as string;
+      if (!newPassword) {
+        res.status(400).json({ message: i18n.__("Password is required") });
+        return;
+      }
+      await this.authService.resetPassword(userId, newPassword);
+      res.json({ message: i18n.__("Password reset successfully") });
+    } catch (err) {
+      next(err);
     }
   };
 }
