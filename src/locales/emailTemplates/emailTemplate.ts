@@ -1,7 +1,19 @@
+
+import i18n from "../../config/i18n"
+
+
+export const generateOtpEmailTemplate = (
+  OTP: string,
+  time: number,
+  lang: "en" | "ar" = "en"
+) => {
+  i18n.setLocale(lang);
+
+  return `
 <mjml>
   <mj-head>
-    <mj-title>SurveyLand OTP Verification</mj-title>
-    <mj-preview>Your SurveyLand OTP Code</mj-preview>
+    <mj-title>${i18n.__("Verify your email")}</mj-title>
+    <mj-preview>${i18n.__("OTP sent to your email")}</mj-preview>
     <mj-style inline="inline">
       .otp-code {
         font-size: 32px;
@@ -18,25 +30,27 @@
           SurveyLand
         </mj-text>
         <mj-text align="center" font-size="20px" color="#333333">
-          Hi there!
+          ${i18n.__("Hi there!")}
         </mj-text>
         <mj-text align="center" font-size="16px" color="#555555">
-          Use the following OTP to complete your verification process. This code will expire in <strong>{{time}}</strong> minutes.
+          ${i18n.__("Use the following OTP to complete your verification process. This code will expire in <strong>%s</strong> minutes.", time.toString())}
         </mj-text>
-        <mj-text align="center" css-class="otp-code">{{OTP}}</mj-text>
+        <mj-text align="center" css-class="otp-code">${OTP}</mj-text>
         <mj-divider border-color="#cccccc" />
         <mj-text align="center" font-size="14px" color="#888888">
-          If you did not request this, you can ignore this email.
+          ${i18n.__("If you did not request this, you can ignore this email.")}
         </mj-text>
       </mj-column>
     </mj-section>
     <mj-section padding="10px 20px">
       <mj-column>
         <mj-text align="center" font-size="12px" color="#aaaaaa">
-          &copy; 2025 SurveyLand. All rights reserved.<br/>
-          Brought to you by the SurveyLand team.
+          &copy; 2025 SurveyLand. ${i18n.__("All rights reserved.")}</br>
+          ${i18n.__("Brought to you by the SurveyLand team.")}
         </mj-text>
       </mj-column>
     </mj-section>
   </mj-body>
 </mjml>
+`;
+};
