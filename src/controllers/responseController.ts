@@ -146,4 +146,33 @@ export class ResponseController {
       next(e);
     }
   };
+
+  getResponsesSurveyId = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      this.setLocale(req);
+      const { surveyId } = req.params;
+      const isExist = await this.responseService.findResponseSurveyId(
+        surveyId,
+        req.query
+      );
+
+      if (!isExist) {
+        throw Error(i18n.__("Response not found"));
+      }
+
+      res.json(
+        this.sendResponse(
+          true,
+          i18n.__("Response retrieved successfully"),
+          isExist
+        )
+      );
+    } catch (e) {
+      next(e);
+    }
+  };
 }
