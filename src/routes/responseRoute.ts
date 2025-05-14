@@ -10,11 +10,6 @@ const responseController = new ResponseController();
 
 router.get("/", authenticateJWT, responseController.findAll);
 router.get("/:id", authenticateJWT, responseController.getById);
-router.get(
-  "/survey/:id",
-  authenticateJWT,
-  responseController.getResponsesSurveyId
-);
 router.post(
   "/",
   authenticateJWT,
