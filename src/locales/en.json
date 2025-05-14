@@ -42,5 +42,26 @@
 	"Invalid OTP": "Invalid OTP",
 	"Access token refreshed successfully.": "Access token refreshed successfully.",
 	"Password is required":"Password is required",
-	"Password reset successfully":"Password reset successfully"
+	"Password reset successfully":"Password reset successfully",
+	"If you did not request this, you can ignore this email.": "If you did not request this, you can ignore this email.",
+	"Hi there!": "Hi there!",
+	"Use the following OTP to complete your verification process. This code will expire in <strong>%s</strong> minutes.": "Use the following OTP to complete your verification process. This code will expire in <strong>%s</strong> minutes.",
+	"All rights reserved.": "All rights reserved.",
+	"Brought to you by the SurveyLand team.": "Brought to you by the SurveyLand team.",
+	"Hello": "Hello",
+	"Your survey '%s' has received %s responses.": "Your survey '%s' has received %s responses.",
+	"Thank you for using SurveyLand.": "Thank you for using SurveyLand.",
+	
+	"Admin logged in successfully": "Admin logged in successfully",
+	"Access denied: Admin permission required": "Access denied: Admin permission required",
+	"Access denied: SuperAdmin permission required": "Access denied: SuperAdmin permission required",
+	"Admin created successfully": "Admin created successfully",
+	"Admin deleted successfully": "Admin deleted successfully",
+	"Admin not found": "Admin not found",
+	"Only superAdmin can create admins": "Only superAdmin can create admins",
+	"Only superAdmin can delete admins": "Only superAdmin can delete admins",
+	"SuperAdmin cannot be deleted": "SuperAdmin cannot be deleted",
+	"Invalid token": "Invalid token",
+	"No token provided": "No token provided",
+	"Logged in successfully with GitHub": "Logged in successfully with GitHub"
 }

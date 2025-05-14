@@ -45,5 +45,25 @@
 	"Invalid OTP": "رمز التحقق غير صالح",
 	"Access token refreshed successfully.": "تم تحديث رمز الوصول بنجاح",
 	"Password is required":"كلمة المرور مطلوبه",
-	"Password reset successfully":"تم إعادة تعيين كلمة المرور بنجاح"
+	"Password reset successfully":"تم إعادة تعيين كلمة المرور بنجاح",
+	"If you did not request this, you can ignore this email.": "إذا لم تطلب ذلك، يمكنك تجاهل هذا البريد الإلكتروني.",
+	"Hi there!": "مرحباً!",
+	"Use the following OTP to complete your verification process. This code will expire in <strong>%s</strong> minutes.": "استخدم رمز التحقق التالي لإكمال عملية التحقق. ستنتهي صلاحية هذا الرمز خلال <strong>%s</strong> دقائق.",
+	"All rights reserved.": "جميع الحقوق محفوظة.",
+	"Brought to you by the SurveyLand team.": "مقدم لكم من فريق SurveyLand.",
+	"Hello": "مرحباً",
+	"Your survey '%s' has received %s responses.": "استطلاعك '%s' تلقى %s استجابة.",
+	"Thank you for using SurveyLand.": "شكراً لاستخدامك SurveyLand.",
+	
+	"Admin logged in successfully": "تم تسجيل دخول المشرف بنجاح",
+	"Access denied: Admin permission required": "تم رفض الوصول: مطلوب صلاحيات المشرف",
+	"Access denied: SuperAdmin permission required": "تم رفض الوصول: مطلوب صلاحيات المشرف الأعلى",
+	"Admin created successfully": "تم إنشاء المشرف بنجاح",
+	"Admin deleted successfully": "تم حذف المشرف بنجاح",
+	"Admin not found": "المشرف غير موجود",
+	"Only superAdmin can create admins": "فقط المشرف الأعلى يمكنه إنشاء مشرفين",
+	"Only superAdmin can delete admins": "فقط المشرف الأعلى يمكنه حذف المشرفين",
+	"SuperAdmin cannot be deleted": "لا يمكن حذف المشرف الأعلى",
+	"Invalid token": "رمز دخول غير صالح",
+	"No token provided": "لم يتم تقديم رمز دخول"
 }

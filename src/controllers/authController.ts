@@ -115,6 +115,73 @@ export class AuthController {
     }
   };
 
+  adminLogin = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const lang = setLocale(req);
+      const { email, password } = req.body;
+      const user = await this.authService.adminLogin(email, password, lang);
+      const token = generateToken({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      });
+      res.json({
+        message: i18n.__("Admin logged in successfully"),
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        },
+      });
+    } catch (e) {
+      next(e);
+    }
+  };
+
+  createAdmin = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const lang = setLocale(req);
+      i18n.setLocale(lang);
+      
+      const user = req.user as User;
+      const { email, password, name } = req.body;
+      
+      const newAdmin = await this.authService.createAdmin(
+        { email, password, name },
+        user.id
+      );
+      
+      res.status(201).json(sendResponse(true, i18n.__("Admin created successfully"), {
+        admin: {
+          id: newAdmin.id,
+          email: newAdmin.email,
+          name: newAdmin.name,
+          role: newAdmin.role
+        }
+      }));
+    } catch (e) {
+      next(e);
+    }
+  };
+
+  deleteAdmin = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const lang = setLocale(req);
+      i18n.setLocale(lang);
+      
+      const user = req.user as User;
+      const adminId = req.params.id;
+      
+      await this.authService.deleteAdmin(adminId, user.id);
+      
+      res.json(sendResponse(true, i18n.__("Admin deleted successfully"), null));
+    } catch (e) {
+      next(e);
+    }
+  };
+
   profile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       setLocale(req);

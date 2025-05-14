@@ -46,6 +46,71 @@ export class AuthService {
     return user;
   }
 
+  async adminLogin(email: string, password: string, lang: string) {
+    i18n.setLocale(lang);
+    const user = await prisma.user.findUnique({ where: { email } });
+    
+    if (!user || !user.password) {
+      throw new CustomError(i18n.__("Incorrect email or password"), 400);
+    }
+    
+    if (user.role !== 'admin' && user.role !== 'superAdmin') {
+      throw new CustomError(i18n.__("Access denied: Admin permission required"), 403);
+    }
+    
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) throw new CustomError(i18n.__("Incorrect email or password"), 400);
+    
+    return user;
+  }
+
+  async createAdmin(data: { email: string; password: string; name: string }, creatorId: string) {
+    const creator = await prisma.user.findUnique({ where: { id: creatorId } });
+    
+    if (!creator || creator.role !== 'superAdmin') {
+      throw new CustomError(i18n.__("Only superAdmin can create admins"), 403);
+    }
+    
+    const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
+    if (existingUser) {
+      throw new CustomError(i18n.__("Email already in use"), 400);
+    }
+    
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    
+    return prisma.user.create({
+      data: {
+        email: data.email,
+        name: data.name,
+        password: hashedPassword,
+        role: 'admin',
+        provider: 'local',
+        isEmailVerified: true, // Admin accounts are pre-verified
+        userIsActive: true
+      }
+    });
+  }
+
+  async deleteAdmin(adminId: string, requesterId: string) {
+    const requester = await prisma.user.findUnique({ where: { id: requesterId } });
+    
+    if (!requester || requester.role !== 'superAdmin') {
+      throw new CustomError(i18n.__("Only superAdmin can delete admins"), 403);
+    }
+    
+    const adminToDelete = await prisma.user.findUnique({ where: { id: adminId } });
+    
+    if (!adminToDelete) {
+      throw new CustomError(i18n.__("Admin not found"), 404);
+    }
+    
+    if (adminToDelete.role === 'superAdmin') {
+      throw new CustomError(i18n.__("SuperAdmin cannot be deleted"), 403);
+    }
+    
+    return prisma.user.delete({ where: { id: adminId } });
+  }
+
   async registerInit(
     {
       email,
@@ -93,7 +158,8 @@ export class AuthService {
         email,
         i18n.__("Verify your email"),
         otpPlain,
-        i18n.__("valid for %s minutes", "5")
+        "5",
+        lang
       );
 
       return { user, mailSent: true };
@@ -151,7 +217,8 @@ export class AuthService {
       email,
       i18n.__("Verify your email"),
       otpPlain,
-      i18n.__("valid for %s minutes", "5")
+      "5",
+      lang
     );
   }
 

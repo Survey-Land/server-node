@@ -1,6 +1,4 @@
-
 import i18n from "../../config/i18n"
-
 
 export const generateOtpEmailTemplate = (
   OTP: string,
@@ -8,12 +6,19 @@ export const generateOtpEmailTemplate = (
   lang: "en" | "ar" = "en"
 ) => {
   i18n.setLocale(lang);
-
+  
+  // Set text direction based on language
+  const dir = lang === "ar" ? "rtl" : "ltr";
+  const fontFamily = lang === "ar" ? "Arial, sans-serif" : "Helvetica Neue, Helvetica, Arial, sans-serif";
+  
   return `
 <mjml>
   <mj-head>
     <mj-title>${i18n.__("Verify your email")}</mj-title>
     <mj-preview>${i18n.__("OTP sent to your email")}</mj-preview>
+    <mj-attributes>
+      <mj-all font-family="${fontFamily}" direction="${dir}" />
+    </mj-attributes>
     <mj-style inline="inline">
       .otp-code {
         font-size: 32px;
@@ -26,7 +31,7 @@ export const generateOtpEmailTemplate = (
   <mj-body background-color="#f4f4f4">
     <mj-section background-color="#ffffff" padding="20px" border-radius="8px">
       <mj-column>
-        <mj-text align="center" font-size="22px" font-weight="bold" color="#0a66c2" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+        <mj-text align="center" font-size="22px" font-weight="bold" color="#0a66c2" font-family="${fontFamily}">
           SurveyLand
         </mj-text>
         <mj-text align="center" font-size="20px" color="#333333">

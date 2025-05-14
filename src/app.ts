@@ -14,6 +14,7 @@ import dotenv from "dotenv";
 import limiterOptions from "./config/limiterOptions";
 import i18n from "i18n";
 import i18nConfig from "./config/i18n";
+import createSuperAdmin from "./scripts/createSuperAdmin";
 dotenv.config();
 
 export default class App {
@@ -27,6 +28,9 @@ export default class App {
     this.configureRoutes();
     this.configureErrorHandlers();
     this.app.use(i18nConfig.init);
+    
+    // Ensure SuperAdmin exists
+    this.ensureSuperAdmin();
   }
 
   private configureCore(): void {
@@ -56,6 +60,14 @@ export default class App {
   private configureErrorHandlers(): void {
     this.app.use(notFoundHandler);
     this.app.use(errorHandler);
+  }
+  
+  private async ensureSuperAdmin(): Promise<void> {
+    try {
+      await createSuperAdmin();
+    } catch (error) {
+      console.error('Error ensuring SuperAdmin exists:', error);
+    }
   }
 
   public async listen(

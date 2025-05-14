@@ -93,7 +93,15 @@ export default class ResponseService {
       const user = await prisma.user.findUnique({where: {id: userId}});
       if (!user) return;
       const subject = "Survey Responses Notification";
-      await sendNotificationEmail(user.email, subject, user.name || 'User', survey.title, responseCount);
+      const userLang = user.language || i18n.getLocale() || "en";
+      await sendNotificationEmail(
+        user.email, 
+        subject, 
+        user.name || 'User', 
+        survey.title, 
+        responseCount,
+        userLang
+      );
       await prisma.survey.update({
         where: { id },
         data: {
