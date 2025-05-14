@@ -153,7 +153,7 @@ export class ResponseController {
     next: NextFunction
   ) => {
     try {
-      this.setLocale(req);
+      setLocale(req);
       const { surveyId } = req.params;
       const isExist = await this.responseService.findResponseSurveyId(
         surveyId,
@@ -165,7 +165,7 @@ export class ResponseController {
       }
 
       res.json(
-        this.sendResponse(
+        sendResponse(
           true,
           i18n.__("Response retrieved successfully"),
           isExist

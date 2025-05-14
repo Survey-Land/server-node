@@ -44,6 +44,7 @@
 	"OTP expired, request a new one": "انتهت صلاحية رمز التحقق، الرجاء طلب رمز جديد",
 	"Invalid OTP": "رمز التحقق غير صالح",
 	"Access token refreshed successfully.": "تم تحديث رمز الوصول بنجاح",
-	"Password is required":"كلمة المرور مطلوبه",
-	"Password reset successfully":"تم إعادة تعيين كلمة المرور بنجاح"
+	"Password is required": "كلمة المرور مطلوبه",
+	"Password reset successfully": "تم إعادة تعيين كلمة المرور بنجاح",
+	"Response submitted successfully": "Response submitted successfully"
 }

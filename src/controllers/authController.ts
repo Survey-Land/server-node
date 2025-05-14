@@ -1,11 +1,19 @@
+// controllers/authController.ts
 import { Request, Response, NextFunction } from "express";
-import { AuthService } from "../services/authService";
-import { generateToken, verifyRefreshToken } from "../utils/jwt.util";
-import i18n from "../config/i18n";
 import passport from "passport";
-import { JwtPayload } from "../types/global";
+import i18n from "../config/i18n";
+import { AuthService } from "../services/authService";
+import { signAccess, signRefresh, verifyRefresh } from "../utils/jwt.util";
 import { setLocale, sendResponse } from "../utils/response";
+import { JwtPayload } from "../types/global";
 import { User } from "@prisma/client";
+
+const cookieOptions = {
+  httpOnly: true,
+  sameSite: "strict" as const,
+  secure: process.env.NODE_ENV === "production",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+};
 
 export class AuthController {
   private authService = new AuthService();
@@ -20,33 +28,27 @@ export class AuthController {
     }
   };
 
-  registerInit = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  registerInit = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const lang = setLocale(req);
       const { email, password, name } = req.body;
 
-      const { user, mailSent } = await this.authService.registerInit(
+      const { mailSent } = await this.authService.registerInit(
         { email, password, name },
         lang
       );
 
-      res
-        .status(202)
-        .json(
-          sendResponse(
-            true,
-            mailSent
-              ? i18n.__("OTP sent to your email")
-              : i18n.__("OTP created but email failed; please use /otp/resend"),
-            null
-          )
-        );
-    } catch (err) {
-      next(err);
+      res.status(202).json(
+        sendResponse(
+          true,
+          mailSent
+            ? i18n.__("OTP sent to your email")
+            : i18n.__("OTP created but email failed; please use /otp/resend"),
+          null
+        )
+      );
+    } catch (e) {
+      next(e);
     }
   };
 
@@ -56,27 +58,33 @@ export class AuthController {
       const { email, otp } = req.body;
 
       const user = await this.authService.verifyOtp({ email, otp }, lang);
-      const token = generateToken({
+
+      const accessToken = signAccess({
         id: user.id,
         email: user.email,
         role: user.role,
       });
+      const refreshToken = signRefresh({ id: user.id });
 
-      res.status(201).json(
-        sendResponse(true, i18n.__("Registration complete"), {
-          token,
-          user: {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-          },
-        })
-      );
-    } catch (err) {
-      next(err);
+      res
+        .cookie("refreshToken", refreshToken, cookieOptions)
+        .status(201)
+        .json(
+          sendResponse(true, i18n.__("Registration complete"), {
+            accessToken,
+            user: {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+            },
+          })
+        );
+    } catch (e) {
+      next(e);
     }
   };
+
   resendOtp = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const lang = setLocale(req);
@@ -85,8 +93,8 @@ export class AuthController {
       await this.authService.resendOtp(email, lang);
 
       res.json(sendResponse(true, i18n.__("OTP resent to your email"), null));
-    } catch (err) {
-      next(err);
+    } catch (e) {
+      next(e);
     }
   };
 
@@ -94,25 +102,57 @@ export class AuthController {
     try {
       const lang = setLocale(req);
       const { email, password } = req.body;
+
       const user = await this.authService.login(email, password, lang);
-      const token = generateToken({
+
+      const accessToken = signAccess({
         id: user.id,
         email: user.email,
         role: user.role,
       });
-      res.json({
-        message: i18n.__("Logged in successfully"),
-        token,
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        },
-      });
+      const refreshToken = signRefresh({ id: user.id });
+
+      res
+        .cookie("refreshToken", refreshToken, cookieOptions)
+        .json({
+          message: i18n.__("Logged in successfully"),
+          accessToken,
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          },
+        });
     } catch (e) {
       next(e);
     }
+  };
+
+  refreshToken = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { refreshToken } = req.cookies;
+      if (!refreshToken) throw new Error("No refresh token");
+
+      const payload = verifyRefresh(refreshToken) as JwtPayload;
+
+      const accessToken = signAccess({
+        id: payload.id,
+        email: payload.email,
+        role: payload.role,
+      });
+
+      res.json({ success: true, accessToken });
+    } catch (e) {
+      next(e);
+    }
+  };
+
+  logout = (_req: Request, res: Response) => {
+    setLocale(_req);
+    res
+      .clearCookie("refreshToken", cookieOptions)
+      .json({ message: i18n.__("Logged out successfully") });
   };
 
   profile = async (req: Request, res: Response, next: NextFunction) => {
@@ -126,66 +166,30 @@ export class AuthController {
     }
   };
 
-  logout = (_req: Request, res: Response) => {
-    setLocale(_req);
-    res.json({ message: i18n.__("Logged out successfully") });
-  };
-
-  googleLogin = (req: Request, res: Response, next: NextFunction) => {
+  googleLogin = (req: Request, res: Response, next: NextFunction) =>
     passport.authenticate("google", { scope: ["profile", "email"] })(
       req,
       res,
       next
     );
-  };
 
-  googleCallback = (req: Request, res: Response, next: NextFunction) => {
+  googleCallback = (req: Request, res: Response, next: NextFunction) =>
     passport.authenticate("google", { session: false }, (err, user) => {
       if (err || !user)
-        return res
-          .status(400)
-          .json({ message: i18n.__("Authentication failed") });
-      const token = generateToken({
+        return res.status(400).json({ message: i18n.__("Authentication failed") });
+
+      const accessToken = signAccess({
         id: user.id,
         email: user.email,
         role: user.role,
       });
-      res.json({
-        message: i18n.__("Logged in successfully with Google"),
-        token,
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        },
-      });
-    })(req, res, next);
-  };
+      const refreshToken = signRefresh({ id: user.id });
 
-  githubLogin(req: Request, res: Response, next: NextFunction) {
-    passport.authenticate("github", { scope: ["user:email"] })(req, res, next);
-  }
-  githubCallback = (req: Request, res: Response, next: Function) => {
-    passport.authenticate(
-      "github",
-      { session: false },
-      (err: any, user: any, _info: any) => {
-        if (err || !user) {
-          return res
-            .status(400)
-            .json({ message: i18n.__("Authentication failed") });
-        }
-
-        const token = generateToken({
-          id: user.id,
-          email: user.email,
-          role: user.role,
-        });
-
-        res.json({
-          message: i18n.__("Logged in successfully with GitHub"),
-          token,
+      res
+        .cookie("refreshToken", refreshToken, cookieOptions)
+        .json({
+          message: i18n.__("Logged in successfully with Google"),
+          accessToken,
           user: {
             id: user.id,
             email: user.email,
@@ -193,57 +197,62 @@ export class AuthController {
             role: user.role,
           },
         });
+    })(req, res, next);
+
+  githubLogin = (req: Request, res: Response, next: NextFunction) =>
+    passport.authenticate("github", { scope: ["user:email"] })(req, res, next);
+
+  githubCallback = (req: Request, res: Response, next: NextFunction) =>
+    passport.authenticate(
+      "github",
+      { session: false },
+      (err: any, user: any) => {
+        if (err || !user)
+          return res
+            .status(400)
+            .json({ message: i18n.__("Authentication failed") });
+
+        const accessToken = signAccess({
+          id: user.id,
+          email: user.email,
+          role: user.role,
+        });
+        const refreshToken = signRefresh({ id: user.id });
+
+        res
+          .cookie("refreshToken", refreshToken, cookieOptions)
+          .json({
+            message: i18n.__("Logged in successfully with GitHub"),
+            accessToken,
+            user: {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+            },
+          });
       }
     )(req, res, next);
-  };
 
-  refreshToken = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const refreshToken = req.cookies.refreshToken;
-
-      if (!refreshToken) {
-        throw new Error("Refresh token is missing.");
-      }
-
-      const user = verifyRefreshToken(refreshToken) as JwtPayload;
-
-      if (!user) {
-        throw new Error("Invalid refresh token payload.");
-      }
-
-      const accessToken = generateToken({
-        id: user.id,
-        email: user.email,
-        role: user.role,
-      });
-
-      res.status(200).json({
-        success: true,
-        message: "Access token refreshed successfully.",
-        accessToken,
-      });
-    } catch (e) {
-      next(e);
-    }
-  };
   resetPassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
       setLocale(req);
       const user = req.user as User;
       const { newPassword } = req.body;
+
       if (!user) {
         res.status(401).json({ message: "Unauthorized" });
         return;
       }
-      const userId = user.id as string;
       if (!newPassword) {
         res.status(400).json({ message: i18n.__("Password is required") });
         return;
       }
-      await this.authService.resetPassword(userId, newPassword);
+
+      await this.authService.resetPassword(user.id, newPassword);
       res.json({ message: i18n.__("Password reset successfully") });
-    } catch (err) {
-      next(err);
+    } catch (e) {
+      next(e);
     }
   };
 }

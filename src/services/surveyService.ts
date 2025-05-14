@@ -178,12 +178,14 @@ export class SurveyService {
         });
     }
 
-    async submitResponse(link: string, answers: any) {
+    async submitResponse(link: string, data: any) {
         const surveyId = decodeSurveyId(link);
         await prisma.response.create({
             data: {
                 surveyId,
-                answers,
+                answers:data.answers,
+                respondentEmail:data.respondentEmail,
+                respondentName:data.respondentName,
             },
         });
     }

@@ -1,23 +1,11 @@
-// src/utils/jwt.util.ts
+// utils/jwt.ts
 import jwt from "jsonwebtoken";
 
-export function generateToken(payload: object): string {
-  if (!process.env.JWT_SECRET) {
-    throw new Error("JWT_SECRET is not defined in environment variables");
-  }
+export const signAccess = (payload: object) =>
+  jwt.sign(payload, process.env.JWT_ACCESS_SECRET as string, { expiresIn: "15m" });
 
-  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "30d" });
-}
+export const signRefresh = (payload: object) =>
+  jwt.sign(payload, process.env.JWT_REFRESH_SECRET as string, { expiresIn: "7d" });
 
-export function generateRefetchToken(payload: object): string {
-  if (!process.env.REFRESH_TOKEN) {
-    throw new Error("REFRESH_TOKEN is not defined in environment variables");
-  }
-
-  return jwt.sign(payload, process.env.REFRESH_TOKEN, { expiresIn: "30d" });
-}
-
-export function verifyRefreshToken(refreshToken: string) {
-  const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN as string);
-  return decoded;
-}
+export const verifyRefresh = (token: string) =>
+  jwt.verify(token, process.env.JWT_REFRESH_SECRET as string);

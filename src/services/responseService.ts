@@ -114,6 +114,7 @@ export default class ResponseService {
       handlePrismaError(e, i18n.__("Response"));
     }
   }
+  
   async checkSurveyMilestone(id: string) {
     try {
       const responseCount = await prisma.response.count({where: {surveyId: id }});
