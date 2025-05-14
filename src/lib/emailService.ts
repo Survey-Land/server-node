@@ -3,7 +3,7 @@ import nodemailer from "nodemailer";
 import mjml2html from "mjml";
 import fs from "fs";
 import path from "path";
-import logger from "./logger";          
+import logger from "./logger";    
 
 const transporter = nodemailer.createTransport({
   service: process.env.NODEMAILER_SERVICE,
@@ -21,7 +21,7 @@ export async function sendOtpEmail(
   time: string
 ) {
   try {
-    const mjmlPath = path.join(__dirname, "../locales/emailTemplate.mjml");
+    const mjmlPath = path.join(__dirname, "../locales/emailTemplates/emailTemplate.mjml");
     const mjmlTemplate = fs.readFileSync(mjmlPath, "utf-8");
     const html = mjml2html(
       mjmlTemplate
@@ -49,3 +49,41 @@ export async function sendOtpEmail(
     throw err; 
   }
 }
+
+export async function sendNotificationEmail(
+  email: string,
+  subject: string,
+  creatorName: string,
+  surveyTitle: string,
+  responseCount: number,
+) {
+  try {
+    const mjmlPath = path.join(__dirname, "../locales/emailTemplates/notificationTemplate.mjml");
+    const mjmlTemplate = fs.readFileSync(mjmlPath, "utf-8");
+    const html = mjml2html(
+      mjmlTemplate
+        .replace("{{creatorName}}", creatorName)
+        .replace("{{surveyTitle}}", surveyTitle)
+        .replace("{{responseCount}}", responseCount.toString())
+    ).html;
+    const info = await transporter.sendMail({
+      from: `"SurveyLand" <${process.env.NODEMAILER_USER}>`,
+      to: email,
+      subject,
+      html,
+    });
+
+    logger.info("OTP email sent", { email, messageId: info.messageId });
+    return info;
+  } catch (err) {
+    logger.error("Failed to send OTP email", {
+      email,
+      err: (err as Error).message,
+      stack: (err as Error).stack,
+    });
+
+  
+    throw err; 
+  }
+}
+

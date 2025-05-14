@@ -3,6 +3,7 @@ import prisma from "../lib/prisma";
 import { handlePrismaError } from "../utils/prisma-error";
 import { Prisma } from "@prisma/client";
 import i18n from "../config/i18n";
+import { sendNotificationEmail } from "../lib/emailService";
 export default class ResponseService {
   async findById(id: string) {
     try {
@@ -80,4 +81,61 @@ export default class ResponseService {
       handlePrismaError(e, i18n.__("Response"));
     }
   }
+  //query: any, lang: string
+  async findResponseSurveyId(surveyId: string, query: any) {
+    try {
+      const survey = await prisma.survey.findFirst({
+        where: {
+          id: surveyId,
+        },
+        include: {
+          responses: true,
+        },
+      });
+
+      if (!survey) {
+        throw new Error("Survey not found");
+      }
+
+      const headers = survey.questions.map(
+        (q, i) => `Q${i + 1}: ${q.questionText}`
+      );
+
+      const rows = survey.responses;
+
+      return {
+        surveyId: survey.id,
+        exportAt: new Date().toISOString(),
+        headers,
+        rows,
+        count: rows.length,
+      };
+    } catch (e) {
+      handlePrismaError(e, i18n.__("Response"));
+    }
+  }
+  async checkSurveyMilestone(id: string) {
+    try {
+      const responseCount = await prisma.response.count({where: {surveyId: id }});
+      if(responseCount % 10 !== 0 || responseCount === 0) return;
+      const survey = await prisma.survey.findUnique({where: {id}});
+      if (!survey) return;
+      if(survey.lastMilestone === responseCount) return;
+      const userId  = survey.userId;
+      const user = await prisma.user.findUnique({where: {id: userId}});
+      if (!user) return;
+      const subject = "Survey Responses Notification";
+      await sendNotificationEmail(user.email, subject, user.name || 'User', survey.title, responseCount);
+      await prisma.survey.update({
+        where: { id },
+        data: {
+          lastMilestone: responseCount
+        },
+      });
+      
+    } catch (e) {
+      handlePrismaError(e, i18n.__("Response"));
+    }
+  }
 }
+

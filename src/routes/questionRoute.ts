@@ -7,9 +7,9 @@ import { createQuestionSchema, updateQuestionSchema } from "../validation/questi
 const router = Router();
 const controller = new QuestionObjectController();
 
-router.post("/:surveyId/questions", authenticateJWT, validate(createQuestionSchema), controller.addQuestion);
-router.get("/:surveyId/questions", authenticateJWT, controller.getQuestions);
-router.put("/:surveyId/questions/:qid", authenticateJWT, validate(updateQuestionSchema), controller.updateQuestion);
-router.delete("/:surveyId/questions/:qid", authenticateJWT, controller.deleteQuestion);
+router.post("/:surveyId", authenticateJWT, validate(createQuestionSchema), controller.addQuestion);
+router.get("/:surveyId", authenticateJWT, controller.getQuestions);
+router.put("/:surveyId/qid/:qid", authenticateJWT, validate(updateQuestionSchema), controller.updateQuestion);
+router.delete("/:surveyId/qid/:qid", authenticateJWT, controller.deleteQuestion);
 
 export default router;
