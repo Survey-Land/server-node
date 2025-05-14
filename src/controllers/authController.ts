@@ -161,8 +161,8 @@ export class AuthController {
           role: newAdmin.role
         }
       }));
-    } catch (e) {
-      next(e);
+    } catch (err) {
+      next(err);
     }
   };
 
