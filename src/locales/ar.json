@@ -23,7 +23,27 @@
 	"Failed to create response": "فشل في إنشاء الاستجابة",
 	"Response updated successfully": "تم تحديث الاستجابة بنجاح",
 	"Response deleted successfully": "تم حذف الاستجابة بنجاح",
-	"Error while processing response": "خطأ أثناء معالجة الاستجابة"
+	"Error while processing response": "خطأ أثناء معالجة الاستجابة",
+	"Survey created successfully": "تم إنشاء الاستبيان بنجاح",
+	"Survey updated successfully": "تم تعديل الاستبيان بنجاح",
+	"Survey deleted successfully": "تم حذف الاستبيان بنجاح",
+	"Survey not found": "الاستبيان غير موجود",
+	"Survey creation failed": "فشل في إنشاء الاستبيان",
+	"Survey": "الاستبيان",
+	"An error occurred while updating the survey": "حدث خطاء اثناء تحديث الاستبيان",
+	"Verify your email": "تحقق من بريدك الإلكتروني",
+	"valid for %s minutes": "صالح لمدة 5 دقيقة",
+	"OTP sent to your email. Please verify to complete registration": "تم إرسال رمز التحقق إلى بريدك الإلكتروني. يُرجى التحقق لإكمال التسجيل",
+	"OTP sent to your email": "تم إرسال رمز التحقق إلى بريدك الإلكتروني",
+	"OTP resent to your email": "تم إعادة إرسال رمز التحقق إلى بريدك الإلكتروني",
+	"Registration complete": " اكتمل التسجيل",
+	"Invalid request": "OTP غير موجود لهذا المستخدم",
+	"Email already in use": "",
+	"OTP created but email failed; please use /otp/resend": "تم إنشاء رمز التحقق لكن فشل إرسال الرسالة؛ يُرجى استخدام ‎/otp/resend‎",
+	"No OTP found, please request one": "لم يتم العثور على رمز تحقق، الرجاء طلب رمز جديد",
+	"OTP expired, request a new one": "انتهت صلاحية رمز التحقق، الرجاء طلب رمز جديد",
+	"Invalid OTP": "رمز التحقق غير صالح",
+	"Access token refreshed successfully.": "تم تحديث رمز الوصول بنجاح",
+	"Password is required":"كلمة المرور مطلوبه",
+	"Password reset successfully":"تم إعادة تعيين كلمة المرور بنجاح"
 }
-  
-  

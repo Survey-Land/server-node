@@ -48,12 +48,24 @@ npm run prisma:studio
 
 ## Environment Variables
 ```env
-DATABASE_URL="postgresql://user:pass@localhost:5432/surveyland"
-S3_REGION="us-east-1"
-S3_ACCESS_KEY="YOUR_KEY"
-S3_SECRET_KEY="YOUR_SECRET"
-JWT_SECRET="your_jwt_secret_here"
-NODE_ENV="development"
+DATABASE_URL="mongodb+srv://"
+JWT_SECRET=
+
+REGION=
+ACCESSKEYID=
+SECRETACCESSKEY=
+
+GOOGLE_CALLBACK_URL=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+GITHUB_CALLBACK_URL=
+
+NODEMAILER_SERVICE=
+NODEMAILER_USER=
+NODEMAILER_PASSWORD=
 ```
 
 ## API Endpoints

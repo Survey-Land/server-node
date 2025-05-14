@@ -9,9 +9,12 @@ const router = Router();
 const authController = new AuthController();
 
 router.post("/refresh", authController.refreshToken);
-router.post("/register", validate(registerSchema), authController.register);
+router.post("/register", validate(registerSchema), authController.registerInit);
+router.post("/register/verify", authController.registerVerify);
+router.post("/otp/resend", authController.resendOtp);
 router.post("/login", validate(loginSchema), authController.login);
 router.post("/logout", authenticateJWT, authController.logout);
+router.post("/resetPassword", authenticateJWT, authController.resetPassword);
 router.get("/profile", authenticateJWT, authController.profile);
 router.get("/users", authenticateJWT, authController.findAll);
 router.get("/google", authController.googleLogin);
