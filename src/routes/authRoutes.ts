@@ -4,6 +4,7 @@ import { registerSchema, loginSchema } from "../validation/authValidation";
 import { validate } from "../middleware/validateMiddleware";
 import { authenticateJWT } from "../middleware/authMiddleware";
 import passport from "passport";
+import { signAccess, signRefresh } from "../utils/jwt.util";
 
 const router = Router();
 const authController = new AuthController();
@@ -21,5 +22,9 @@ router.get("/google", authController.googleLogin);
 router.get("/google/callback", authController.googleCallback);
 router.get("/github", authController.githubLogin);
 router.get("/github/callback", authController.githubCallback);
+
+router.get("/twitter", authController.twitterLogin);
+
+router.get("/twitter/callback", authController.twitterCallback);
 
 export default router;

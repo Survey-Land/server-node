@@ -28,6 +28,7 @@
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
+    "@types/express-session": "^1.18.1",
     "@types/i18n": "^0.13.12",
     "@types/mjml": "^4.7.4",
     "@types/morgan": "^1.9.9",
@@ -39,6 +40,7 @@
     "@types/passport-github2": "^1.2.9",
     "@types/passport-google-oauth20": "^2.0.16",
     "@types/passport-jwt": "^4.0.1",
+    "@types/passport-twitter": "^1.0.40",
     "@types/uuid": "^10.0.0",
     "prisma": "^6.7.0",
     "ts-node": "^10.9.2",
@@ -54,6 +56,7 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "express-rate-limit": "^7.5.0",
+    "express-session": "^1.18.1",
     "hashids": "^2.3.0",
     "helmet": "^8.1.0",
     "i18n": "^0.15.1",
@@ -69,6 +72,7 @@
     "passport-github2": "^0.1.12",
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
+    "passport-twitter": "^1.0.4",
     "uuid": "^11.1.0",
     "winston": "^3.17.0"
   }
