@@ -3,6 +3,7 @@ const corsOptions: cors.CorsOptions = {
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Specify which methods are allowed
   allowedHeaders: ['Content-Type', 'Authorization'], // Specify which headers are allowed
+  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
 }
 
 export default corsOptions

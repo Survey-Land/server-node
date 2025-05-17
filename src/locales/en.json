@@ -3,6 +3,8 @@
 	"User registered successfully": "User registered successfully",
 	"Logged in successfully": "Logged in successfully",
 	"Logged out successfully": "Logged out successfully",
+	"Logged in successfully with GitHub": "Logged in successfully with GitHub",
+	"Logged in successfully with Twitter": "Logged in successfully with Twitter",
 	"Incorrect email or password": "Incorrect email or password",
 	"User not found": "User not found",
 	"Database error: %s": "Database error: %s",

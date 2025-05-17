@@ -4,6 +4,7 @@
 	"Logged in successfully": "تم تسجيل الدخول بنجاح",
 	"Logged in successfully with Google": "تم تسجيل الدخول بنجاح باستخدام غوغل",
 	"Logged in successfully with GitHub": "تم تسجيل الدخول بنجاح باستخدام غيتهاب",
+	"Logged in successfully with Twitter": "تم تسجيل الدخول بنجاح باستخدام تويتر",
 	"Logged out successfully": "تم تسجيل الخروج بنجاح",
 	"Incorrect email or password": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
 	"Authentication failed": "فشل المصادقة",
