@@ -45,5 +45,8 @@
 	"Access token refreshed successfully.": "Access token refreshed successfully.",
 	"Password is required": "Password is required",
 	"Password reset successfully": "Password reset successfully",
-	"Response submitted successfully": "Response submitted successfully"
+	"Response submitted successfully": "Response submitted successfully",
+	"Your account has been locked. Please try after 30 seconds": "Your account has been locked. Please try after 30 seconds",
+	"Account temporarily locked. Try again later.": "Account temporarily locked. Try again later.",
+	"Account temporarily locked. Try again in 30 seconds.": "Account temporarily locked. Try again in 30 seconds."
 }
