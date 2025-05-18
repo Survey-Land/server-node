@@ -47,5 +47,9 @@
 	"Access token refreshed successfully.": "تم تحديث رمز الوصول بنجاح",
 	"Password is required": "كلمة المرور مطلوبه",
 	"Password reset successfully": "تم إعادة تعيين كلمة المرور بنجاح",
-	"Response submitted successfully": "Response submitted successfully"
+	"Response submitted successfully": "تم إرسال الاستجابة بنجاح",
+	"Your account has been locked. Please try after 30 seconds": "تم قفل حسابك. يرجى المحاولة بعد 30 ثانية",
+	"Your account is locked. Please try after ${(user.lockUntil.getTime() - now.getTime()) / 1000} seconds": "حسابك مقفل. يرجى المحاولة بعد ${(user.lockUntil.getTime() - now.getTime()) / 1000} ثانية",
+	"Account temporarily locked. Try again later.": "Account temporarily locked. Try again later.",
+	"Account temporarily locked. Try again in 30 seconds.": "Account temporarily locked. Try again in 30 seconds."
 }

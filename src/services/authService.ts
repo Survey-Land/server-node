@@ -13,6 +13,7 @@ import {
 } from "../utils/otp-generation";
 import { sendOtpEmail } from "../lib/emailService";
 import logger from "../lib/logger";
+import { th } from "@faker-js/faker/.";
 
 export class AuthService {
   async findAll(query: any, lang: string) {
@@ -38,15 +39,79 @@ export class AuthService {
     }
   }
 
-  async login(email: string, password: string, lang: string) {
-    i18n.setLocale(lang);
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || !user.password)
-      throw new CustomError(i18n.__("Incorrect email or password"), 400);
-    const ok = await bcrypt.compare(password, user.password);
-    if (!ok) throw new CustomError(i18n.__("Incorrect email or password"), 400);
-    return user;
+async login(email: string, password: string, lang: string) {
+  i18n.setLocale(lang);
+
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  // ✅ check user credentials
+  if (!user || !user.password) {
+    throw new CustomError(i18n.__("Incorrect email or password"), 400);
   }
+
+  const now = new Date();
+
+  // ✅ check if account is locked
+  if (user.lockUntil && user.lockUntil > now) {
+    throw new CustomError(i18n.__("Account temporarily locked. Try again later."), 423);
+  }
+
+  const passwordCorrect = await bcrypt.compare(password, user.password);
+
+  if (!passwordCorrect) {
+    const failedAttempts: number = user.failedLoginAttempts += 1;
+
+    let lockUntil: Date | null = null;
+
+    await prisma.user.update({
+      where: { email },
+      data: {
+        failedLoginAttempts: failedAttempts,
+      },
+    });
+
+    if (failedAttempts === 3) {
+      // ✅ cooldown for 30 seconds
+      lockUntil = new Date(Date.now() + 30 * 1000);
+
+      throw new CustomError(i18n.__("Account temporarily locked. Try again in 30 seconds."), 423);
+    } else if (failedAttempts > 3) {
+      // ✅ lock account for 15 minutes
+      lockUntil = new Date(Date.now() + 15 * 60 * 1000);
+
+      // ✅ send OTP email
+      await sendOtpEmail(
+        email,
+        i18n.__("OTP resent to your email"),
+        generateOtp(),
+        i18n.__("valid for %s minutes", ("5"))
+      );
+
+      throw new CustomError(i18n.__("Account temporarily locked. Check your email for OTP."), 423);
+    }
+
+    await prisma.user.update({
+      where: { email },
+      data: {
+        failedLoginAttempts: failedAttempts,
+        lockUntil,
+      },
+    });
+
+    throw new CustomError(i18n.__("Incorrect email or password"), 400);
+  }
+
+  await prisma.user.update({
+    where: { email },
+    data: {
+      failedLoginAttempts: 0,
+      lockUntil: null,
+    },
+  });
+
+  return user;
+}
+
 
    async registerInit(
     {
