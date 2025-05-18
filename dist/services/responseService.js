@@ -130,7 +130,8 @@ class ResponseService {
             if (!user)
                 return;
             const subject = "Survey Responses Notification";
-            await (0, emailService_1.sendNotificationEmail)(user.email, subject, user.name || 'User', survey.title, responseCount);
+            await (0, emailService_1.sendNotificationEmail)(user.email, subject, user.name || 'User', responseCount, survey.title, 'en' // default language
+            );
             await prisma_1.default.survey.update({
                 where: { id },
                 data: {

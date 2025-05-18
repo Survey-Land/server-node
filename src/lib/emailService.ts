@@ -4,6 +4,8 @@ import mjml2html from "mjml";
 import fs from "fs";
 import path from "path";
 import logger from "./logger";
+import handlebars from "handlebars";
+import i18n from "../config/i18n";
 
 const transporter = nodemailer.createTransport({
   host: process.env.NODEMAILER_HOST ?? "smtp.gmail.com",
@@ -15,54 +17,72 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendOtpEmail(
-  email: string,
+export const sendOtpEmail = async (
+  to: string,
   subject: string,
   otp: string,
-  time: string
-) {
-  const mjmlPath = path.join(
-    __dirname,
-    "../locales/emailTemplates/emailTemplate.mjml"
-  );
-  const mjmlTemplate = fs.readFileSync(mjmlPath, "utf-8");
-  const html = mjml2html(
-    mjmlTemplate.replace("{{OTP}}", otp).replace("{{time}}", time)
-  ).html;
-  const info = await transporter.sendMail({
-    from: `"SurveyLand" <${process.env.NODEMAILER_USER}>`,
-    to: email,
-    subject,
-    html,
-  });
-  logger.info("OTP email sent", { email, messageId: info.messageId });
-  return info;
-}
+  time: string,
+  lang: string = "en"
+) => {
+  try {
+    const templatePath = path.join(__dirname, "../locales/emailTemplates/emailTemplate.mjml");
+    const template = fs.readFileSync(templatePath, "utf8");
+    const templateData = {
+      OTP: otp,
+      time: time,
+      isArabic: lang === "ar"
+    };
 
-export async function sendNotificationEmail(
-  email: string,
+    const { html } = mjml2html(template);
+    const compiledTemplate = handlebars.compile(html);
+    const finalHtml = compiledTemplate(templateData);
+
+    const info = await transporter.sendMail({
+      from: `"SurveyLand" <${process.env.NODEMAILER_USER}>`,
+      to,
+      subject,
+      html: finalHtml,
+    });
+    logger.info("OTP email sent", { email: to, messageId: info.messageId });
+    return info;
+  } catch (error) {
+    console.error("Error sending OTP email:", error);
+    throw error;
+  }
+};
+
+export const sendNotificationEmail = async (
+  to: string,
   subject: string,
   creatorName: string,
+  responseCount: number,
   surveyTitle: string,
-  responseCount: number
-) {
-  const mjmlPath = path.join(
-    __dirname,
-    "../locales/emailTemplates/notificationTemplate.mjml"
-  );
-  const mjmlTemplate = fs.readFileSync(mjmlPath, "utf-8");
-  const html = mjml2html(
-    mjmlTemplate
-      .replace("{{creatorName}}", creatorName)
-      .replace("{{surveyTitle}}", surveyTitle)
-      .replace("{{responseCount}}", responseCount.toString())
-  ).html;
-  const info = await transporter.sendMail({
-    from: `"SurveyLand" <${process.env.NODEMAILER_USER}>`,
-    to: email,
-    subject,
-    html,
-  });
-  logger.info("Notification email sent", { email, messageId: info.messageId });
-  return info;
-}
+  lang: string = "en"
+) => {
+  try {
+    const templatePath = path.join(__dirname, "../locales/emailTemplates/notificationTemplate.mjml");
+    const template = fs.readFileSync(templatePath, "utf8");
+    const templateData = {
+      creatorName,
+      responseCount,
+      surveyTitle,
+      isArabic: lang === "ar"
+    };
+
+    const { html } = mjml2html(template);
+    const compiledTemplate = handlebars.compile(html);
+    const finalHtml = compiledTemplate(templateData);
+
+    const info = await transporter.sendMail({
+      from: `"SurveyLand" <${process.env.NODEMAILER_USER}>`,
+      to,
+      subject,
+      html: finalHtml,
+    });
+    logger.info("Notification email sent", { email: to, messageId: info.messageId });
+    return info;
+  } catch (error) {
+    console.error("Error sending notification email:", error);
+    throw error;
+  }
+};

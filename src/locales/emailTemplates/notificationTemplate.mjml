@@ -1,12 +1,16 @@
 <mjml>
   <mj-head>
-    <mj-title>Survey Response Milestone</mj-title>
-    <mj-preview>You just reached a new response milestone!</mj-preview>
+    <mj-title>{{#if isArabic}}إنجاز في استجابات الاستبيان{{else}}Survey Response Milestone{{/if}}</mj-title>
+    <mj-preview>{{#if isArabic}}لقد وصلت إلى إنجاز جديد في الاستجابات!{{else}}You just reached a new response milestone!{{/if}}</mj-preview>
     <mj-style inline="inline">
       .highlight {
         font-size: 20px;
         font-weight: bold;
         color: #0a66c2;
+      }
+      .rtl {
+        direction: rtl;
+        text-align: right;
       }
     </mj-style>
   </mj-head>
@@ -16,28 +20,42 @@
         <mj-text align="center" font-size="22px" font-weight="bold" color="#0a66c2" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
           SurveyLand
         </mj-text>
-        <mj-text align="center" font-size="20px" color="#333333">
-          Hello {{creatorName}}!
+        <mj-text align="center" font-size="20px" color="#333333" css-class="{{#if isArabic}}rtl{{/if}}">
+          {{#if isArabic}}مرحباً {{creatorName}}!{{else}}Hello {{creatorName}}!{{/if}}
         </mj-text>
-        <mj-text align="center" font-size="16px" color="#555555">
-           Great news! You just reached {{responseCount}} responses
-
+        <mj-text align="center" font-size="16px" color="#555555" css-class="{{#if isArabic}}rtl{{/if}}">
+          {{#if isArabic}}
+          أخبار رائعة! لقد وصلت إلى {{responseCount}} استجابة
+          {{else}}
+          Great news! You just reached {{responseCount}} responses
+          {{/if}}
         </mj-text>
-     
-        <mj-text align="center" font-size="16px" color="#555555">
+        <mj-text align="center" font-size="16px" color="#555555" css-class="{{#if isArabic}}rtl{{/if}}">
+          {{#if isArabic}}
+          لاستبيانك "<strong>{{surveyTitle}}</strong>". استمر في العمل الجيد!
+          {{else}}
           for your survey "<strong>{{surveyTitle}}</strong>". Keep up the great work!
+          {{/if}}
         </mj-text>
         <mj-divider border-color="#cccccc" />
-        <mj-text align="center" font-size="14px" color="#888888">
+        <mj-text align="center" font-size="14px" color="#888888" css-class="{{#if isArabic}}rtl{{/if}}">
+          {{#if isArabic}}
+          سجل الدخول إلى لوحة التحكم لاستكشاف الرؤى.
+          {{else}}
           Log in to your dashboard to explore the insights.
+          {{/if}}
         </mj-text>
       </mj-column>
     </mj-section>
     <mj-section padding="10px 20px">
       <mj-column>
         <mj-text align="center" font-size="12px" color="#aaaaaa">
-          &copy; 2025 SurveyLand. All rights reserved.<br/>
-          Brought to you by the SurveyLand team.
+          &copy; 2025 SurveyLand. {{#if isArabic}}جميع الحقوق محفوظة.{{else}}All rights reserved.{{/if}}<br/>
+          {{#if isArabic}}
+          من تقديم فريق SurveyLand
+          {{else}}
+          Brought to you by the SurveyLand team
+          {{/if}}
         </mj-text>
       </mj-column>
     </mj-section>
