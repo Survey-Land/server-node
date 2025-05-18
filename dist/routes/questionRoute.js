@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const questionController_1 = require("../controllers/questionController");
+const authMiddleware_1 = require("../middleware/authMiddleware");
+const validateMiddleware_1 = require("../middleware/validateMiddleware");
+const questionValidation_1 = require("../validation/questionValidation");
+const router = (0, express_1.Router)();
+const controller = new questionController_1.QuestionObjectController();
+router.post("/:surveyId", authMiddleware_1.authenticateJWT, (0, validateMiddleware_1.validate)(questionValidation_1.createQuestionSchema), controller.addQuestion);
+router.get("/:surveyId", authMiddleware_1.authenticateJWT, controller.getQuestions);
+router.put("/:surveyId/qid/:qid", authMiddleware_1.authenticateJWT, (0, validateMiddleware_1.validate)(questionValidation_1.updateQuestionSchema), controller.updateQuestion);
+router.delete("/:surveyId/qid/:qid", authMiddleware_1.authenticateJWT, controller.deleteQuestion);
+exports.default = router;

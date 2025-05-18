@@ -63,5 +63,7 @@
 	"SuperAdmin cannot be deleted": "SuperAdmin cannot be deleted",
 	"Invalid token": "Invalid token",
 	"No token provided": "No token provided",
-	"Logged in successfully with GitHub": "Logged in successfully with GitHub"
+	"Logged in successfully with GitHub": "Logged in successfully with GitHub",
+	"Admin already exists": "Admin already exists",
+	"Email is available": "Email is available"
 }

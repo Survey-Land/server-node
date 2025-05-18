@@ -19,6 +19,7 @@ router.post("/resetPassword", authenticateJWT, authController.resetPassword);
 router.get("/profile", authenticateJWT, authController.profile);
 router.get("/users", authenticateJWT, authController.findAll);
 router.post("/admin/create", authenticateJWT, isSuperAdmin, authController.createAdmin);
+router.post("/admin/check-email", authController.checkAdminExists);
 router.delete("/admin/:id", authenticateJWT, isSuperAdmin, authController.deleteAdmin);
 router.get("/google", authController.googleLogin);
 router.get("/google/callback", authController.googleCallback);

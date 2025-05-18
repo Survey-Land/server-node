@@ -73,7 +73,11 @@ export class AuthService {
     
     const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
     if (existingUser) {
-      throw new CustomError(i18n.__("Email already in use"), 400);
+      if (existingUser.role === 'admin' || existingUser.role === 'superAdmin') {
+        throw new CustomError(i18n.__("Admin already exists"), 400);
+      } else {
+        throw new CustomError(i18n.__("Email already in use"), 400);
+      }
     }
     
     const hashedPassword = await bcrypt.hash(data.password, 10);

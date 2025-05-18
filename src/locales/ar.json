@@ -65,5 +65,7 @@
 	"Only superAdmin can delete admins": "فقط المشرف الأعلى يمكنه حذف المشرفين",
 	"SuperAdmin cannot be deleted": "لا يمكن حذف المشرف الأعلى",
 	"Invalid token": "رمز دخول غير صالح",
-	"No token provided": "لم يتم تقديم رمز دخول"
+	"No token provided": "لم يتم تقديم رمز دخول",
+	"Admin already exists": "المشرف موجود بالفعل",
+	"Email is available": "البريد الإلكتروني متاح"
 }

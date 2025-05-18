@@ -6,6 +6,9 @@ import passport from "passport";
 import { JwtPayload } from "../types/global";
 import { setLocale, sendResponse } from "../utils/response";
 import { User } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export class AuthController {
   private authService = new AuthService();
@@ -309,6 +312,29 @@ export class AuthController {
       }
       await this.authService.resetPassword(userId, newPassword);
       res.json({ message: i18n.__("Password reset successfully") });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  checkAdminExists = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const lang = setLocale(req);
+      i18n.setLocale(lang);
+      
+      const { email } = req.body;
+      
+      const existingUser = await prisma.user.findUnique({ where: { email } });
+      
+      if (existingUser) {
+        if (existingUser.role === 'admin' || existingUser.role === 'superAdmin') {
+          return res.status(400).json(sendResponse(false, i18n.__("Admin already exists"), null));
+        } else {
+          return res.status(400).json(sendResponse(false, i18n.__("Email already in use"), null));
+        }
+      }
+      
+      return res.json(sendResponse(true, i18n.__("Email is available"), null));
     } catch (err) {
       next(err);
     }
