@@ -10,27 +10,26 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const authenticateJWT = async (req, res, next) => {
     const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.split(' ')[1];
-        try {
-            const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_ACCESS_SECRET);
-            const user = await prisma_1.default.user.findUnique({
-                where: { id: decoded.id },
-            });
-            if (user) {
-                req.user = user;
-                next();
-            }
-            else {
-                res.status(401).json({ message: 'غير مصرح: المستخدم غير موجود' });
-            }
-        }
-        catch (error) {
-            res.status(401).json({ message: 'غير مصرح: رمز دخول غير صالح' });
-        }
+    if (!authHeader) {
+        res.status(401).json({ message: "No authorization header" });
+        return;
     }
-    else {
-        res.status(401).json({ message: 'غير مصرح: لم يتم تقديم رمز دخول' });
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_ACCESS_SECRET || 'adsdsdFSDSDAq12312AQW!');
+        const user = await prisma_1.default.user.findUnique({
+            where: { id: decoded.id }
+        });
+        if (!user) {
+            res.status(401).json({ message: "User not found" });
+            return;
+        }
+        req.user = user;
+        next();
+    }
+    catch (error) {
+        res.status(401).json({ message: "Invalid token" });
+        return;
     }
 };
 exports.authenticateJWT = authenticateJWT;

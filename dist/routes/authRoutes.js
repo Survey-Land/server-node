@@ -5,6 +5,7 @@ const authController_1 = require("../controllers/authController");
 const authValidation_1 = require("../validation/authValidation");
 const validateMiddleware_1 = require("../middleware/validateMiddleware");
 const authMiddleware_1 = require("../middleware/authMiddleware");
+const roleMiddleware_1 = require("../middleware/roleMiddleware");
 const router = (0, express_1.Router)();
 const authController = new authController_1.AuthController();
 router.post("/refresh", authController.refreshToken);
@@ -20,4 +21,10 @@ router.get("/google", authController.googleLogin);
 router.get("/google/callback", authController.googleCallback);
 router.get("/github", authController.githubLogin);
 router.get("/github/callback", authController.githubCallback);
+router.get("/twitter", authController.twitterLogin);
+router.get("/twitter/callback", authController.twitterCallback);
+// Admin only routes
+router.post("/admin", authMiddleware_1.authenticateJWT, (0, validateMiddleware_1.validate)(authValidation_1.adminCreateSchema), roleMiddleware_1.isAdmin, authController.createAdmin);
+router.delete("/users/:id", authMiddleware_1.authenticateJWT, roleMiddleware_1.isAdmin, authController.deleteUser);
+router.patch("/users/:id/role", authMiddleware_1.authenticateJWT, (0, validateMiddleware_1.validate)(authValidation_1.updateRoleSchema), roleMiddleware_1.isAdmin, authController.updateUserRole);
 exports.default = router;

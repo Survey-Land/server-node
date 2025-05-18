@@ -4,6 +4,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GitHubStrategy } from "passport-github2";
 import { Strategy as TwitterStrategy } from "passport-twitter";
 import prisma from "../lib/prisma";
+import { UserRole } from "@prisma/client";
 
 const jwtOpts = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -41,7 +42,7 @@ passport.use(
                             email,
                             name: profile.displayName,
                             provider: "google",
-                            role: "user",
+                            role: UserRole.USER,
                         },
                     });
                 }
@@ -60,33 +61,21 @@ passport.use(
             clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
             callbackURL: process.env.GITHUB_CALLBACK_URL as string,
         },
-        async (
-            _accessToken: string,
-            _refreshToken: string,
-            profile: any,
-            done: Function
-        ) => {
+        async (_accessToken, _refreshToken, profile, done) => {
             try {
                 const email = profile.emails?.[0]?.value;
-
                 if (!email) return done(null, false);
-
                 let user = await prisma.user.findUnique({ where: { email } });
-
                 if (!user) {
                     user = await prisma.user.create({
                         data: {
                             email,
-                            name:
-                                profile.displayName ||
-                                profile.username ||
-                                "No Name",
+                            name: profile.displayName || profile.username || "No Name",
                             provider: "github",
-                            role: "user",
+                            role: UserRole.USER,
                         },
                     });
                 }
-
                 return done(null, user);
             } catch (error) {
                 console.error("GitHub Auth Error:", error);
@@ -115,39 +104,31 @@ passport.use(
         },
         async function (req, token, tokenSecret, profile, done) {
             try {
-                // Check if the profile not suspended
                 if (profile._json.suspended) {
                     return done(
-                        new Error(
-                            "Twitter account is suspended. Please use another account."
-                        ),
+                        new Error("Twitter account is suspended. Please use another account."),
                         null
                     );
                 }
 
-                // Check if the user already exists in the database
                 let user = await prisma.user.findUnique({
                     where: { email: profile.emails?.[0]?.value },
                 });
 
-                // If the user exists, update their information
                 if (user && user.provider !== "twitter") {
                     return done(
-                        new Error(
-                            `User already registered with ${user.provider} provider`
-                        ),
+                        new Error(`User already registered with ${user.provider} provider`),
                         null
                     );
                 }
 
                 if (!user) {
-                    // If the user doesn't exist, create a new user
                     user = await prisma.user.create({
                         data: {
                             email: profile.emails?.[0]?.value as string,
                             name: profile.displayName,
                             provider: "twitter",
-                            role: "user",
+                            role: UserRole.USER,
                             isEmailVerified: true,
                             userIsActive: true,
                         },

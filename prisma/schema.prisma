@@ -18,6 +18,12 @@ enum QuestionType {
   textarea
 }
 
+enum UserRole {
+  ADMIN
+  EDITOR
+  USER
+}
+
 type QuestionObject {
   qid          String
   questionText String
@@ -34,7 +40,8 @@ model User {
   provider        String
   isEmailVerified Boolean  @default(false)
   userIsActive    Boolean  @default(true)
-  role            String   @default("user")
+  role            UserRole @default(USER)
+  isAdmin         Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   surveys         Survey[]

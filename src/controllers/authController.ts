@@ -16,7 +16,11 @@ const cookieOptions = {
 };
 
 export class AuthController {
-    private authService = new AuthService();
+    private authService: AuthService;
+
+    constructor() {
+        this.authService = new AuthService();
+    }
 
     findAll = async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -110,7 +114,7 @@ export class AuthController {
             const lang = setLocale(req);
             const { email, password } = req.body;
 
-            const user = await this.authService.login(email, password, lang);
+            const { user, mailSent } = await this.authService.login(email, password, lang);
 
             const accessToken = signAccess({
                 id: user.id,
@@ -120,7 +124,9 @@ export class AuthController {
             const refreshToken = signRefresh({ id: user.id });
 
             res.cookie("refreshToken", refreshToken, cookieOptions).json({
-                message: i18n.__("Logged in successfully"),
+                message: mailSent 
+                    ? i18n.__("Login successful. Please check your email for OTP verification.")
+                    : i18n.__("Login successful but OTP email failed. Please try again."),
                 accessToken,
                 user: {
                     id: user.id,
@@ -128,6 +134,7 @@ export class AuthController {
                     name: user.name,
                     role: user.role,
                 },
+                requiresOtp: true
             });
         } catch (e) {
             next(e);
@@ -301,6 +308,59 @@ export class AuthController {
 
             await this.authService.resetPassword(user.id, newPassword);
             res.json({ message: i18n.__("Password reset successfully") });
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    createAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const lang = setLocale(req);
+            const { email, password, name } = req.body;
+            const user = await this.authService.createAdminUser(
+                { email, password, name },
+                lang
+            );
+            res.status(201).json({
+                message: i18n.__("Admin user created successfully"),
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role,
+                },
+            });
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const lang = setLocale(req);
+            const { id } = req.params;
+            const result = await this.authService.deleteUser(id, lang);
+            res.json(result);
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    updateUserRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const lang = setLocale(req);
+            const { id } = req.params;
+            const { role } = req.body;
+            const user = await this.authService.updateUserRole(id, role, lang);
+            res.json({
+                message: i18n.__("User role updated successfully"),
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role,
+                },
+            });
         } catch (e) {
             next(e);
         }

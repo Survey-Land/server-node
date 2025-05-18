@@ -4,31 +4,42 @@ import prisma from '../lib/prisma';
 import { User } from '@prisma/client';
 import dotenv from 'dotenv';
 
-dotenv.config(); 
+dotenv.config();
 
-export const authenticateJWT = async (req: Request, res: Response, next: NextFunction) => {
+// Extend Express Request type to include user
+declare global {
+  namespace Express {
+    interface Request {
+      user?: User;
+    }
+  }
+}
+
+export const authenticateJWT = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const authHeader = req.headers.authorization;
 
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.split(' ')[1];
+  if (!authHeader) {
+    res.status(401).json({ message: "No authorization header" });
+    return;
+  }
 
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET as string) as { id: string; email: string; role: string };
+  const token = authHeader.split(' ')[1];
 
-      const user: User | null = await prisma.user.findUnique({
-        where: { id: decoded.id },
-      });
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET || 'adsdsdFSDSDAq12312AQW!') as { id: string };
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id }
+    });
 
-      if (user) {
-        req.user = user;
-        next();
-      } else {
-        res.status(401).json({ message: 'غير مصرح: المستخدم غير موجود' });
-      }
-    } catch (error) {
-      res.status(401).json({ message: 'غير مصرح: رمز دخول غير صالح' });
+    if (!user) {
+      res.status(401).json({ message: "User not found" });
+      return;
     }
-  } else {
-    res.status(401).json({ message: 'غير مصرح: لم يتم تقديم رمز دخول' });
+
+    req.user = user;
+    next();
+  } catch (error) {
+    res.status(401).json({ message: "Invalid token" });
+    return;
   }
 };
