@@ -38,6 +38,8 @@ model User {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   surveys         Survey[]
+  failedLoginAttempts Int      @default(0)
+  lockUntil     DateTime? 
 }
 
 model Survey {

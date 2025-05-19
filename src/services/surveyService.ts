@@ -172,6 +172,17 @@ export class SurveyService {
 
     async getSurveyByLink(link: string) {
         const surveyId = decodeSurveyId(link);
+        const survey = await prisma.survey.findUnique({
+            where: { id: surveyId },
+            include:{},
+        });
+        if (!survey) {
+            throw new CustomError(i18n.__("Survey not found"), 404);
+        }
+        if (survey.deadline !== null && survey.deadline < new Date()) {
+            throw new CustomError(i18n.__("Survey is expired"), 400);
+        }
+
         return await prisma.survey.findUnique({
             where: { id: surveyId },
             include: {},
