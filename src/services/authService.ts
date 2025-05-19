@@ -78,13 +78,13 @@ async login(email: string, password: string, lang: string) {
     } else if (failedAttempts > 3) {
       // ✅ lock account for 15 minutes
       lockUntil = new Date(Date.now() + 15 * 60 * 1000);
-
       // ✅ send OTP email
       await sendOtpEmail(
         email,
         i18n.__("OTP resent to your email"),
-        generateOtp(),
-        i18n.__("valid for %s minutes", ("5"))
+        generateOtp().toString(),
+        i18n.__("valid for %s minutes", "5")
+        
       );
 
       throw new CustomError(i18n.__("Account temporarily locked. Check your email for OTP."), 423);

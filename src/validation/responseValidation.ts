@@ -1,5 +1,4 @@
 import Joi from "joi";
-
 export const createResponseSchema = Joi.object({
   surveyId: Joi.string()
     .required()
@@ -13,8 +12,11 @@ export const createResponseSchema = Joi.object({
     "any.required": "البريد الإلكتروني مطلوب",
   }),
 
-  answers: Joi.object().required().messages({
-    "object.base": "Answers must be an object",
-    "any.required": "Answers are required",
-  }),
+   answers: Joi.object()
+    .pattern(Joi.string(), Joi.string().max(200))
+    .required()
+    .messages({
+      "object.base": "Answers must be an object",
+      "any.required": "Answers are required",
+    }),
 });
