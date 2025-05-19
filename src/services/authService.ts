@@ -39,6 +39,7 @@ export class AuthService {
     }
   }
 
+
 async login(email: string, password: string, lang: string) {
   i18n.setLocale(lang);
 
@@ -114,6 +115,7 @@ async login(email: string, password: string, lang: string) {
 
 
    async registerInit(
+
     {
       email,
       password,
@@ -158,7 +160,6 @@ async login(email: string, password: string, lang: string) {
       return { user, mailSent: false };
     }
   }
-
 
   async verifyOtp(
     { email, otp }: { email: string; otp: string },
