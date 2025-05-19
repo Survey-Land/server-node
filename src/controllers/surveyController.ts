@@ -68,20 +68,20 @@ export class SurveyController {
 
       const userId = user.id as string;
 
+      const lang = this.setLocale(req);
+
       const count = await prisma.survey.count({
         where: {
           userId,
         },
       });
-
-      if (count >= 1) {
+      //surveyLimitReached
+      if (count >= 30) {
         res.status(401).json({
-          message:
-            "Survey creation limit reached. Each user can create up to 30 surveys only",
+          message: i18n.__("Survey Limit Reached"),
         });
         return;
       }
-      const lang = this.setLocale(req);
 
       const survey = await this.surveyService.createSurvey(
         req.body,
