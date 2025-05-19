@@ -71,12 +71,10 @@ async login(email: string, password: string, lang: string) {
     });
 
     if (failedAttempts === 3) {
-      // ✅ cooldown for 30 seconds
       lockUntil = new Date(Date.now() + 30 * 1000);
 
       throw new CustomError(i18n.__("Account temporarily locked. Try again in 30 seconds."), 423);
     } else if (failedAttempts > 3) {
-      // ✅ lock account for 15 minutes
       lockUntil = new Date(Date.now() + 15 * 60 * 1000);
       // ✅ send OTP email
       await sendOtpEmail(
@@ -123,7 +121,7 @@ async login(email: string, password: string, lang: string) {
   ) {
     i18n.setLocale(lang);
     const hashedPw = await bcrypt.hash(password, 10);
-    const otpPlain = generateOtp();
+    const otpPlain = generateOtp().toString();
     const otpHash = await hashOtp(otpPlain);
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing?.isEmailVerified)
@@ -187,7 +185,7 @@ async login(email: string, password: string, lang: string) {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user || user.isEmailVerified)
       throw new Error(i18n.__("Invalid request"));
-    const otpPlain = generateOtp();
+    const otpPlain = generateOtp().toString();
     const otpHash = await hashOtp(otpPlain);
     await prisma.oTP.upsert({
       where: { email },
