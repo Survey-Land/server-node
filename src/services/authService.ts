@@ -41,6 +41,7 @@ export class AuthService {
   async login(email: string, password: string, lang: string) {
     i18n.setLocale(lang);
     const user = await prisma.user.findUnique({ where: { email } });
+    console.log(user);
     if (!user || !user.password)
       throw new CustomError(i18n.__("Incorrect email or password"), 400);
     const ok = await bcrypt.compare(password, user.password);
@@ -48,7 +49,7 @@ export class AuthService {
     return user;
   }
 
-   async registerInit(
+  async registerInit(
     {
       email,
       password,
@@ -93,7 +94,6 @@ export class AuthService {
       return { user, mailSent: false };
     }
   }
-
 
   async verifyOtp(
     { email, otp }: { email: string; otp: string },
