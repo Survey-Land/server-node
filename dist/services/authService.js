@@ -43,12 +43,65 @@ class AuthService {
     async login(email, password, lang) {
         i18n_1.default.setLocale(lang);
         const user = await prisma_1.default.user.findUnique({ where: { email } });
-        if (!user || !user.password)
+        if (!user || !user.password) {
             throw new custom_error_1.CustomError(i18n_1.default.__("Incorrect email or password"), 400);
-        const ok = await bcrypt_1.default.compare(password, user.password);
-        if (!ok)
+        }
+        const now = new Date();
+        if (user.lockUntil && user.lockUntil > now) {
+            throw new custom_error_1.CustomError(i18n_1.default.__("Account temporarily locked. Try again later."), 423);
+        }
+        const passwordCorrect = await bcrypt_1.default.compare(password, user.password);
+        if (!passwordCorrect) {
+            const failedAttempts = user.failedLoginAttempts += 1;
+            let lockUntil = null;
+            await prisma_1.default.user.update({
+                where: { email },
+                data: {
+                    failedLoginAttempts: failedAttempts,
+                },
+            });
+            if (failedAttempts === 3) {
+                lockUntil = new Date(Date.now() + 30 * 1000);
+                throw new custom_error_1.CustomError(i18n_1.default.__("Account temporarily locked. Try again in 30 seconds."), 423);
+            }
+            else if (failedAttempts > 3) {
+                lockUntil = new Date(Date.now() + 15 * 60 * 1000);
+                await (0, emailService_1.sendOtpEmail)(email, i18n_1.default.__("OTP resent to your email"), (0, otp_generation_1.generateOtp)(), i18n_1.default.__("valid for %s minutes", ("5")));
+                throw new custom_error_1.CustomError(i18n_1.default.__("Account temporarily locked. Check your email for OTP."), 423);
+            }
+            await prisma_1.default.user.update({
+                where: { email },
+                data: {
+                    failedLoginAttempts: failedAttempts,
+                    lockUntil,
+                },
+            });
             throw new custom_error_1.CustomError(i18n_1.default.__("Incorrect email or password"), 400);
-        return user;
+        }
+        // Reset failed attempts and lock
+        await prisma_1.default.user.update({
+            where: { email },
+            data: {
+                failedLoginAttempts: 0,
+                lockUntil: null,
+            },
+        });
+        // Generate and send OTP after successful login
+        const otpPlain = (0, otp_generation_1.generateOtp)();
+        const otpHash = await (0, otp_generation_1.hashOtp)(otpPlain);
+        await prisma_1.default.oTP.upsert({
+            where: { email },
+            update: { otpHash, expiresAt: (0, otp_generation_1.getExpiry)(5) },
+            create: { email, otpHash, expiresAt: (0, otp_generation_1.getExpiry)(5) },
+        });
+        try {
+            await (0, emailService_1.sendOtpEmail)(email, i18n_1.default.__("Login Verification OTP"), otpPlain, i18n_1.default.__("valid for %s minutes", "5"));
+            return { user, mailSent: true };
+        }
+        catch (err) {
+            logger_1.default.error("OTP email failed", { email, err: err.message });
+            return { user, mailSent: false };
+        }
     }
     async registerInit({ email, password, name, }, lang) {
         i18n_1.default.setLocale(lang);
@@ -65,7 +118,7 @@ class AuthService {
                     name,
                     password: hashedPw,
                     provider: "local",
-                    role: "user",
+                    role: "USER",
                     isEmailVerified: false,
                 },
             }));
@@ -82,6 +135,56 @@ class AuthService {
             logger_1.default.error("OTP email failed", { email, err: err.message });
             return { user, mailSent: false };
         }
+    }
+    async createAdminUser({ email, password, name, }, lang) {
+        i18n_1.default.setLocale(lang);
+        const hashedPw = await bcrypt_1.default.hash(password, 10);
+        // Check if admin already exists
+        const existingAdmin = await prisma_1.default.user.findFirst({
+            where: { isAdmin: true }
+        });
+        if (existingAdmin) {
+            throw new Error(i18n_1.default.__("Admin user already exists"));
+        }
+        const user = await prisma_1.default.user.create({
+            data: {
+                email,
+                name,
+                password: hashedPw,
+                provider: "local",
+                role: "ADMIN",
+                isAdmin: true,
+                isEmailVerified: true,
+            },
+        });
+        return user;
+    }
+    async deleteUser(id, lang) {
+        i18n_1.default.setLocale(lang);
+        const user = await prisma_1.default.user.findUnique({ where: { id } });
+        if (!user) {
+            throw new custom_error_1.CustomError(i18n_1.default.__("User not found"), 404);
+        }
+        if (user.isAdmin) {
+            throw new custom_error_1.CustomError(i18n_1.default.__("Cannot delete admin user"), 403);
+        }
+        await prisma_1.default.user.delete({ where: { id } });
+        return { message: i18n_1.default.__("User deleted successfully") };
+    }
+    async updateUserRole(id, role, lang) {
+        i18n_1.default.setLocale(lang);
+        const user = await prisma_1.default.user.findUnique({ where: { id } });
+        if (!user) {
+            throw new custom_error_1.CustomError(i18n_1.default.__("User not found"), 404);
+        }
+        if (user.isAdmin) {
+            throw new custom_error_1.CustomError(i18n_1.default.__("Cannot modify admin user role"), 403);
+        }
+        const updatedUser = await prisma_1.default.user.update({
+            where: { id },
+            data: { role: role },
+        });
+        return updatedUser;
     }
     async verifyOtp({ email, otp }, lang) {
         i18n_1.default.setLocale(lang);

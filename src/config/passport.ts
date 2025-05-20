@@ -41,7 +41,7 @@ passport.use(
                             email,
                             name: profile.displayName,
                             provider: "google",
-                            role: "user",
+                            role: "USER",
                         },
                     });
                 }
@@ -82,7 +82,7 @@ passport.use(
                                 profile.username ||
                                 "No Name",
                             provider: "github",
-                            role: "user",
+                            role: "USER",
                         },
                     });
                 }
@@ -147,7 +147,7 @@ passport.use(
                             email: profile.emails?.[0]?.value as string,
                             name: profile.displayName,
                             provider: "twitter",
-                            role: "user",
+                            role: "USER",
                             isEmailVerified: true,
                             userIsActive: true,
                         },

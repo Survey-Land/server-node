@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const express_session_1 = __importDefault(require("express-session"));
 const routes_1 = __importDefault(require("./routes"));
 const morgan_1 = __importDefault(require("morgan"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
@@ -34,13 +35,28 @@ class App {
         this.app.set("trust proxy", 1);
     }
     configureMiddlewares() {
-        this.app.use((0, helmet_1.default)({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
+        this.app.use((0, express_session_1.default)({
+            secret: process.env.SESSION_SECRET || "Secret_key",
+            resave: false,
+            saveUninitialized: true,
+            cookie: {
+                secure: process.env.NODE_ENV === "production",
+                httpOnly: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                maxAge: 1000 * 60 * 60 * 24, // 24 hours
+            },
+        }));
+        this.app.use(passport_1.default.initialize());
+        this.app.use(passport_1.default.session());
+        this.app.use((0, helmet_1.default)({
+            contentSecurityPolicy: false,
+            crossOriginEmbedderPolicy: false,
+        }));
         this.app.use((0, cors_1.default)(corsOptions_1.default));
         this.app.use(limiterOptions_1.default);
         this.app.use((0, morgan_1.default)("dev"));
         this.app.use(express_1.default.json());
         this.app.use((0, cookie_parser_1.default)());
-        this.app.use(passport_1.default.initialize());
         this.app.use(i18n_1.default.init);
     }
     configureRoutes() {

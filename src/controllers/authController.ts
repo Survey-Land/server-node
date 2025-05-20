@@ -1,12 +1,12 @@
-// controllers/authController.ts
 import { Request, Response, NextFunction } from "express";
 import passport from "passport";
 import i18n from "../config/i18n";
 import { AuthService } from "../services/authService";
-import { signAccess, signRefresh, verifyRefresh } from "../utils/jwt.util";
+
 import { setLocale, sendResponse } from "../utils/response";
 import { JwtPayload } from "../types/global";
 import { User } from "@prisma/client";
+import { generateRefetchToken, generateToken, verifyRefreshToken } from "../utils/jwt.util";
 
 const cookieOptions = {
     httpOnly: true,
@@ -16,7 +16,11 @@ const cookieOptions = {
 };
 
 export class AuthController {
-    private authService = new AuthService();
+    private authService: AuthService;
+
+    constructor() {
+        this.authService = new AuthService();
+    }
 
     findAll = async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -65,12 +69,12 @@ export class AuthController {
 
             const user = await this.authService.verifyOtp({ email, otp }, lang);
 
-            const accessToken = signAccess({
+            const accessToken = generateToken({
                 id: user.id,
                 email: user.email,
                 role: user.role,
             });
-            const refreshToken = signRefresh({ id: user.id });
+            const refreshToken = generateRefetchToken({ id: user.id });
 
             res.cookie("refreshToken", refreshToken, cookieOptions)
                 .status(201)
@@ -110,17 +114,19 @@ export class AuthController {
             const lang = setLocale(req);
             const { email, password } = req.body;
 
-            const user = await this.authService.login(email, password, lang);
+            const { user, mailSent } = await this.authService.login(email, password, lang);
 
-            const accessToken = signAccess({
+            const accessToken = generateToken({
                 id: user.id,
                 email: user.email,
                 role: user.role,
             });
-            const refreshToken = signRefresh({ id: user.id });
+            const refreshToken = generateRefetchToken({ id: user.id });
 
             res.cookie("refreshToken", refreshToken, cookieOptions).json({
-                message: i18n.__("Logged in successfully"),
+                message: mailSent 
+                    ? i18n.__("Login successful. Please check your email for OTP verification.")
+                    : i18n.__("Login successful but OTP email failed. Please try again."),
                 accessToken,
                 user: {
                     id: user.id,
@@ -128,6 +134,7 @@ export class AuthController {
                     name: user.name,
                     role: user.role,
                 },
+                requiresOtp: true
             });
         } catch (e) {
             next(e);
@@ -139,9 +146,9 @@ export class AuthController {
             const { refreshToken } = req.cookies;
             if (!refreshToken) throw new Error("No refresh token");
 
-            const payload = verifyRefresh(refreshToken) as JwtPayload;
+            const payload = verifyRefreshToken(refreshToken) as JwtPayload;
 
-            const accessToken = signAccess({
+            const accessToken = generateToken({
                 id: payload.id,
                 email: payload.email,
                 role: payload.role,
@@ -185,12 +192,12 @@ export class AuthController {
                     .status(400)
                     .json({ message: i18n.__("Authentication failed") });
 
-            const accessToken = signAccess({
+            const accessToken = generateToken({
                 id: user.id,
                 email: user.email,
                 role: user.role,
             });
-            const refreshToken = signRefresh({ id: user.id });
+            const refreshToken = generateRefetchToken({ id: user.id });
 
             res.cookie("refreshToken", refreshToken, cookieOptions).json({
                 message: i18n.__("Logged in successfully with Google"),
@@ -221,12 +228,12 @@ export class AuthController {
                         .status(400)
                         .json({ message: i18n.__("Authentication failed") });
 
-                const accessToken = signAccess({
+                const accessToken = generateToken({
                     id: user.id,
                     email: user.email,
                     role: user.role,
                 });
-                const refreshToken = signRefresh({ id: user.id });
+                const refreshToken = generateRefetchToken({ id: user.id });
 
                 res.cookie("refreshToken", refreshToken, cookieOptions).json({
                     message: i18n.__("Logged in successfully with GitHub"),
@@ -263,13 +270,13 @@ export class AuthController {
                     });
                 }
 
-                const accessToken = signAccess({
+                const accessToken = generateToken({
                     id: user.id,
                     email: user.email,
                     role: user.role,
                 });
 
-                const refreshToken = signRefresh({ id: user.id });
+                const refreshToken = generateRefetchToken({ id: user.id });
 
                 res.cookie("refreshToken", refreshToken, cookieOptions);
 
@@ -301,6 +308,59 @@ export class AuthController {
 
             await this.authService.resetPassword(user.id, newPassword);
             res.json({ message: i18n.__("Password reset successfully") });
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    createAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const lang = setLocale(req);
+            const { email, password, name } = req.body;
+            const user = await this.authService.createAdminUser(
+                { email, password, name },
+                lang
+            );
+            res.status(201).json({
+                message: i18n.__("Admin user created successfully"),
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role,
+                },
+            });
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const lang = setLocale(req);
+            const { id } = req.params;
+            const result = await this.authService.deleteUser(id, lang);
+            res.json(result);
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    updateUserRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const lang = setLocale(req);
+            const { id } = req.params;
+            const { role } = req.body;
+            const user = await this.authService.updateUserRole(id, role, lang);
+            res.json({
+                message: i18n.__("User role updated successfully"),
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role,
+                },
+            });
         } catch (e) {
             next(e);
         }
