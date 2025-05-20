@@ -29,7 +29,7 @@ async function generateFakeSurveys() {
 
     // Generate fake Survey
     const survey = {
-      userId: "68287609d1d82fe013ec1388", // Fixed User ID
+      userId: "682c6a577fb973a37b8af40d", // Fixed User ID
       title: faker.lorem.words({ min: 3, max: 6 }),
       description: faker.lorem.paragraph(),
       deadline: faker.date.future({ years: 1 }),
