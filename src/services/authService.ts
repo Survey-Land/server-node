@@ -46,7 +46,7 @@ async login(email: string, password: string, lang: string) {
   const user = await prisma.user.findUnique({ where: { email } });
 
   // ✅ check user credentials
-  if (!user || !user.password) {
+  if (!user || !user.password || user.isEmailVerified === false) {
     throw new CustomError(i18n.__("Incorrect email or password"), 400);
   }
 
@@ -126,7 +126,7 @@ async login(email: string, password: string, lang: string) {
     const otpPlain = generateOtp().toString();
     const otpHash = await hashOtp(otpPlain);
     const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing?.isEmailVerified)
+    if (existing)
       throw new Error(i18n.__("Email already in use"));
     const user =
       existing ??
