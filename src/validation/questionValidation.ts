@@ -18,24 +18,32 @@ const mcqChoice = Joi.string()
     "string.max": "Each choice must be at most 50 characters"
   });
 
-export const createQuestionSchema = Joi.object({
+const singleQuestionSchema = Joi.object({
   questionText,
   type: Joi.string()
     .valid("mcq", "textarea")
-    .required()
-    .messages({
-      "any.only": 'Type must be either "mcq" or "textarea"',
-      "any.required": "type is required"
-    }),
+    .required(),
   choices: Joi.alternatives().conditional("type", {
     is: "mcq",
-    then: Joi.array().items(mcqChoice).min(2).required().messages({
-      "array.min": "At least two choices are required for MCQ"
-    }),
-    otherwise: Joi.forbidden()
+    then: Joi.array().items(mcqChoice).min(2).required(),
+    otherwise: Joi.forbidden(),
   }),
-  isRequired: Joi.boolean().optional()
+  isRequired: Joi.boolean().optional(),
 });
+
+export const createQuestionSchema = Joi.object({
+  questions: Joi.array()
+    .items(singleQuestionSchema)
+    .min(2)
+    .max(20)
+    .required()
+    .messages({
+      "array.base": "Questions should be an array of question objects",
+      "array.min": "You must provide at least 2 questions",
+      "array.max": "You can provide a maximum of 20 questions",
+    }),
+});
+
 
 export const updateQuestionSchema = Joi.object({
   questionText: Joi.string()

@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import { QuestionObjectService } from "../services/questionService";
 import { setLocale, sendResponse } from "../utils/response";
 import { v4 as uuidv4 } from "uuid";
+import { QuestionObject } from "../types/global";
 
 export class QuestionObjectController  {
   private service = new QuestionObjectService();
@@ -11,9 +12,12 @@ export class QuestionObjectController  {
     try {
       setLocale(req);
       const { surveyId } = req.params;
-      const question = { ...req.body, qid: uuidv4() };
+      const questions = req.body.questions.map((q: QuestionObject) => ({
+      ...q,
+      qid: uuidv4(),
+      }));
 
-      const updatedSurvey = await this.service.addQuestion(surveyId, question);
+      const updatedSurvey = await this.service.addQuestions(surveyId, questions);
 
       res.status(201).json(
         sendResponse(true, "Question added successfully", updatedSurvey)

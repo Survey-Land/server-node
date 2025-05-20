@@ -10,7 +10,16 @@ export class QuestionObjectService {
       },
     });
   }
-
+  async addQuestions(surveyId: string, questions: QuestionObject[]) {
+    return prisma.survey.update({
+      where: { id: surveyId },
+      data: {
+        questions: {
+          push: questions,
+        },
+      },
+    });
+  }
   async getQuestions(surveyId: string) {
     const survey = await prisma.survey.findUnique({
       where: { id: surveyId },
