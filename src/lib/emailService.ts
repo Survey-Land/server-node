@@ -6,7 +6,7 @@ import path from "path";
 import logger from "./logger";
 
 const transporter = nodemailer.createTransport({
-  host: process.env.NODEMAILER_HOST ?? 'smtp.gmail.com',
+  host: process.env.NODEMAILER_HOST ?? "smtp.gmail.com",
   port: Number(process.env.NODEMAILER_PORT ?? 465),
   secure: true,
   auth: {
@@ -26,9 +26,11 @@ export async function sendOtpEmail(
     "../locales/emailTemplates/emailTemplate.mjml"
   );
   const mjmlTemplate = fs.readFileSync(mjmlPath, "utf-8");
+
   const html = mjml2html(
     mjmlTemplate.replace("{{OTP}}", otp).replace("{{time}}", time)
   ).html;
+
   const info = await transporter.sendMail({
     from: `"SurveyLand" <${process.env.NODEMAILER_USER}>`,
     to: email,

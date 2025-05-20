@@ -18,6 +18,11 @@ enum QuestionType {
   textarea
 }
 
+enum Role {
+  ADMIN
+  USER
+}
+
 type QuestionObject {
   qid          String
   questionText String
@@ -27,36 +32,36 @@ type QuestionObject {
 }
 
 model User {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  name            String?
-  email           String   @unique
-  password        String?
-  provider        String
-  isEmailVerified Boolean  @default(false)
-  userIsActive    Boolean  @default(true)
-  role            String   @default("user")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  surveys         Survey[]
-  failedLoginAttempts Int      @default(0)
-  lockUntil     DateTime? 
+  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
+  name                String?
+  email               String    @unique
+  password            String?
+  provider            String
+  isEmailVerified     Boolean   @default(false)
+  userIsActive        Boolean   @default(true)
+  role                Role      @default(USER)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  surveys             Survey[]
+  failedLoginAttempts Int       @default(0)
+  lockUntil           DateTime?
 }
 
 model Survey {
-  id          String           @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String           @db.ObjectId
-  title       String
-  description String?
-  deadline    DateTime?
-  cover       String?
-  status      SurveyStatus     @default(draft)
-  link        String?
-  questions   QuestionObject[]
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  lastMilestone   Int      @default(0)
-  user        User             @relation(fields: [userId], references: [id])
-  responses   Response[]
+  id            String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String           @db.ObjectId
+  title         String
+  description   String?
+  deadline      DateTime?
+  cover         String?
+  status        SurveyStatus     @default(draft)
+  link          String?
+  questions     QuestionObject[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  lastMilestone Int              @default(0)
+  user          User             @relation(fields: [userId], references: [id])
+  responses     Response[]
 
   @@index([userId])
 }
@@ -75,7 +80,7 @@ model Response {
 
 model OTP {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  email     String    @unique
+  email     String   @unique
   otpHash   String
   expiresAt DateTime
   createdAt DateTime @default(now())
