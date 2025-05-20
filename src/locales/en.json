@@ -1,4 +1,5 @@
 {
+
 	"User": "User",
 	"User registered successfully": "User registered successfully",
 	"Logged in successfully": "Logged in successfully",
@@ -48,5 +49,7 @@
 	"Response submitted successfully": "Response submitted successfully",
 	"Your account has been locked. Please try after 30 seconds": "Your account has been locked. Please try after 30 seconds",
 	"Account temporarily locked. Try again later.": "Account temporarily locked. Try again later.",
-	"Account temporarily locked. Try again in 30 seconds.": "Account temporarily locked. Try again in 30 seconds."
+	"Account temporarily locked. Try again in 30 seconds.": "Account temporarily locked. Try again in 30 seconds.",
+	"Account temporarily locked. Check your email for OTP.": "Account temporarily locked. Check your email for OTP.",
+	"Survey is expired": "Survey is expired"
 }
