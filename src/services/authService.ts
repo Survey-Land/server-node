@@ -39,81 +39,86 @@ export class AuthService {
     }
   }
 
+  async login(email: string, password: string, lang: string) {
+    i18n.setLocale(lang);
 
-async login(email: string, password: string, lang: string) {
-  i18n.setLocale(lang);
+    const user = await prisma.user.findUnique({ where: { email } });
 
-  const user = await prisma.user.findUnique({ where: { email } });
+    // ✅ check user credentials
+    if (!user || !user.password) {
+      throw new CustomError(i18n.__("Incorrect email or password"), 400);
+    }
 
-  // ✅ check user credentials
-  if (!user || !user.password) {
-    throw new CustomError(i18n.__("Incorrect email or password"), 400);
-  }
+    const now = new Date();
 
-  const now = new Date();
-
-  // ✅ check if account is locked
-  if (user.lockUntil && user.lockUntil > now) {
-    throw new CustomError(i18n.__("Account temporarily locked. Try again later."), 423);
-  }
-
-  const passwordCorrect = await bcrypt.compare(password, user.password);
-
-  if (!passwordCorrect) {
-    const failedAttempts: number = user.failedLoginAttempts += 1;
-
-    let lockUntil: Date | null = null;
-
-    await prisma.user.update({
-      where: { email },
-      data: {
-        failedLoginAttempts: failedAttempts,
-      },
-    });
-
-    if (failedAttempts === 3) {
-      lockUntil = new Date(Date.now() + 30 * 1000);
-
-      throw new CustomError(i18n.__("Account temporarily locked. Try again in 30 seconds."), 423);
-    } else if (failedAttempts > 3) {
-      lockUntil = new Date(Date.now() + 15 * 60 * 1000);
-      // ✅ send OTP email
-      await sendOtpEmail(
-        email,
-        i18n.__("OTP resent to your email"),
-        generateOtp().toString(),
-        i18n.__("valid for %s minutes", "5")
-        
+    // ✅ check if account is locked
+    if (user.lockUntil && user.lockUntil > now) {
+      throw new CustomError(
+        i18n.__("Account temporarily locked. Try again later."),
+        423
       );
+    }
 
-      throw new CustomError(i18n.__("Account temporarily locked. Check your email for OTP."), 423);
+    const passwordCorrect = await bcrypt.compare(password, user.password);
+
+    if (!passwordCorrect) {
+      const failedAttempts: number = (user.failedLoginAttempts += 1);
+
+      let lockUntil: Date | null = null;
+
+      await prisma.user.update({
+        where: { email },
+        data: {
+          failedLoginAttempts: failedAttempts,
+        },
+      });
+
+      if (failedAttempts === 3) {
+        lockUntil = new Date(Date.now() + 30 * 1000);
+
+        throw new CustomError(
+          i18n.__("Account temporarily locked. Try again in 30 seconds."),
+          423
+        );
+      } else if (failedAttempts > 3) {
+        lockUntil = new Date(Date.now() + 15 * 60 * 1000);
+        // ✅ send OTP email
+        await sendOtpEmail(
+          email,
+          i18n.__("OTP resent to your email"),
+          generateOtp().toString(),
+          i18n.__("valid for %s minutes", "5")
+        );
+
+        throw new CustomError(
+          i18n.__("Account temporarily locked. Check your email for OTP."),
+          423
+        );
+      }
+
+      await prisma.user.update({
+        where: { email },
+        data: {
+          failedLoginAttempts: failedAttempts,
+          lockUntil,
+        },
+      });
+
+      throw new CustomError(i18n.__("Incorrect email or password"), 400);
     }
 
     await prisma.user.update({
       where: { email },
       data: {
-        failedLoginAttempts: failedAttempts,
-        lockUntil,
+        failedLoginAttempts: 0,
+        lockUntil: null,
       },
     });
 
-    throw new CustomError(i18n.__("Incorrect email or password"), 400);
+    return user;
   }
 
-  await prisma.user.update({
-    where: { email },
-    data: {
-      failedLoginAttempts: 0,
-      lockUntil: null,
-    },
-  });
-
-  return user;
-}
-
-
-   async registerInit(
-
+  async registerInit(
     {
       email,
       password,
@@ -136,7 +141,7 @@ async login(email: string, password: string, lang: string) {
           name,
           password: hashedPw,
           provider: "local",
-          role: "user",
+          // role: "user",
           isEmailVerified: false,
         },
       }));
