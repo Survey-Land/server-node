@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SurveyController = void 0;
 const surveyService_1 = require("../services/surveyService");
 const i18n_1 = __importDefault(require("../config/i18n"));
+const prisma_1 = __importDefault(require("../lib/prisma"));
 class SurveyController {
     constructor() {
         this.surveyService = new surveyService_1.SurveyService();
@@ -58,6 +59,18 @@ class SurveyController {
             }
             const userId = user.id;
             const lang = this.setLocale(req);
+            const count = await prisma_1.default.survey.count({
+                where: {
+                    userId,
+                },
+            });
+            //surveyLimitReached
+            if (count >= 30) {
+                res.status(401).json({
+                    message: i18n_1.default.__("Survey Limit Reached"),
+                });
+                return;
+            }
             const survey = await this.surveyService.createSurvey(req.body, lang, userId);
             res.status(201).json({
                 message: i18n_1.default.__("Survey created successfully"),

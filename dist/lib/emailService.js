@@ -12,12 +12,12 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const logger_1 = __importDefault(require("./logger"));
 const transporter = nodemailer_1.default.createTransport({
-    host: process.env.NODEMAILER_HOST ?? "smtp.gmail.com",
+    host: process.env.NODEMAILER_HOST ?? 'smtp.gmail.com',
     port: Number(process.env.NODEMAILER_PORT ?? 465),
     secure: true,
     auth: {
-        user: process.env.NODEMAILER_USER || "devcommunity43@gmail.com",
-        pass: process.env.NODEMAILER_PASSWORD || "dnpb gnrl atua aiml",
+        user: process.env.NODEMAILER_USER || 'devcommunity43@gmail.com',
+        pass: process.env.NODEMAILER_PASSWORD || 'irzk bufw qdud dedh',
     },
 });
 async function sendOtpEmail(email, subject, otp, time) {
