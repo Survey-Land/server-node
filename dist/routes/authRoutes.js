@@ -20,4 +20,6 @@ router.get("/google", authController.googleLogin);
 router.get("/google/callback", authController.googleCallback);
 router.get("/github", authController.githubLogin);
 router.get("/github/callback", authController.githubCallback);
+router.get("/twitter", authController.twitterLogin);
+router.get("/twitter/callback", authController.twitterCallback);
 exports.default = router;

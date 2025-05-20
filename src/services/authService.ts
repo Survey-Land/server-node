@@ -1,19 +1,18 @@
 // src/services/authService.ts
 import bcrypt from "bcrypt";
-import prisma from "../lib/prisma";
-import { CustomError } from "../utils/custom-error";
-import { handlePrismaError } from "../utils/prisma-error";
-import { processFilters, parseInclude } from "../utils/query-parser";
 import i18n from "../config/i18n";
-import {
-  generateOtp,
-  hashOtp,
-  getExpiry,
-  compareOtp,
-} from "../utils/otp-generation";
 import { sendOtpEmail } from "../lib/emailService";
 import logger from "../lib/logger";
-import { th } from "@faker-js/faker/.";
+import prisma from "../lib/prisma";
+import { CustomError } from "../utils/custom-error";
+import {
+  compareOtp,
+  generateOtp,
+  getExpiry,
+  hashOtp,
+} from "../utils/otp-generation";
+import { handlePrismaError } from "../utils/prisma-error";
+import { parseInclude, processFilters } from "../utils/query-parser";
 
 export class AuthService {
   async findAll(query: any, lang: string) {
@@ -83,7 +82,7 @@ export class AuthService {
         );
       } else if (failedAttempts > 3) {
         lockUntil = new Date(Date.now() + 15 * 60 * 1000);
-        // ✅ send OTP email
+        
         await sendOtpEmail(
           email,
           i18n.__("OTP resent to your email"),
@@ -170,7 +169,7 @@ export class AuthService {
     lang: string
   ) {
     i18n.setLocale(lang);
-    return prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx:any) => {
       const otpRecord = await tx.oTP.findFirst({ where: { email } });
       if (!otpRecord)
         throw new Error(i18n.__("No OTP found, please request one"));
@@ -237,4 +236,62 @@ export class AuthService {
       data: { password: hashedPass },
     });
   }
+  static async createAdminUser(lang = 'en') {
+    i18n.setLocale(lang);
+
+    const email = 'admin@survey.com';
+    const password = '123456789';
+    const hashedPw = await bcrypt.hash(password, 10);
+
+    const existingAdmin = await prisma.user.findFirst({ where: { email } });
+    if (existingAdmin) {
+      return { created: false };          
+    }
+
+    await prisma.user.create({
+      data: {
+        email,
+        password: hashedPw,
+        provider: 'local',
+        role: 'ADMIN',
+        isEmailVerified: true,
+      },
+    });
+
+    return { created: true };           
+  }
+
+
+  async deleteUser(id: string, lang: string) {
+    i18n.setLocale(lang);
+    const user = await prisma.user.findUnique({ where: { id } });
+    
+    if (!user) {
+      throw new CustomError(i18n.__("User not found"), 404);
+    }
+
+   
+
+    await prisma.user.delete({ where: { id } });
+    return { message: i18n.__("User deleted successfully") };
+  }
+
+  async updateUserRole(id: string, role: string, lang: string) {
+    i18n.setLocale(lang);
+    const user = await prisma.user.findUnique({ where: { id } });
+    
+    if (!user) {
+      throw new CustomError(i18n.__("User not found"), 404);
+    }
+
+
+
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: { role: role as any },
+    });
+
+    return updatedUser;
+  }
+
 }

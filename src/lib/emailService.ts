@@ -26,7 +26,7 @@ export async function sendOtpEmail(
     "../locales/emailTemplates/emailTemplate.mjml"
   );
   const mjmlTemplate = fs.readFileSync(mjmlPath, "utf-8");
-
+ 
   const html = mjml2html(
     mjmlTemplate.replace("{{OTP}}", otp).replace("{{time}}", time)
   ).html;

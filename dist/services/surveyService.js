@@ -113,6 +113,14 @@ class SurveyService {
                 ...existingSurvey,
                 ...data,
             };
+            if (Array.isArray(updatedSurveyData.questions)) {
+                updatedSurveyData.questions = {
+                    set: updatedSurveyData.questions.map((q) => ({
+                        ...q,
+                        choices: Array.isArray(q.choices) ? q.choices : [],
+                    })),
+                };
+            }
             delete updatedSurveyData.id;
             const updatedSurvey = await prisma_1.default.survey.update({
                 where: { id },
@@ -121,6 +129,7 @@ class SurveyService {
             return updatedSurvey;
         }
         catch (error) {
+            console.log(error);
             if (error instanceof custom_error_1.CustomError) {
                 throw error;
             }
@@ -158,10 +167,17 @@ class SurveyService {
     }
     async getSurveyByLink(link) {
         const surveyId = (0, hashids_1.decodeSurveyId)(link);
-        return await prisma_1.default.survey.findUnique({
+        const survey = await prisma_1.default.survey.findUnique({
             where: { id: surveyId },
             include: {},
         });
+        if (!survey) {
+            throw new custom_error_1.CustomError(i18n_1.default.__("Survey not found"), 404);
+        }
+        if (survey.deadline !== null && survey.deadline < new Date()) {
+            throw new custom_error_1.CustomError(i18n_1.default.__("Survey is expired"), 400);
+        }
+        return survey;
     }
     async submitResponse(link, data) {
         const surveyId = (0, hashids_1.decodeSurveyId)(link);

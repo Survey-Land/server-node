@@ -69,6 +69,7 @@ export default class App {
 
     private configureRoutes(): void {
         this.app.use("/api", routes);
+        
     }
 
     private configureErrorHandlers(): void {
