@@ -10,8 +10,8 @@ const transporter = nodemailer.createTransport({
   port: Number(process.env.NODEMAILER_PORT ?? 465),
   secure: true,
   auth: {
-    user: process.env.NODEMAILER_USER || "devcommunity43@gmail.com",
-    pass: process.env.NODEMAILER_PASSWORD || "dnpb gnrl atua aiml",
+    user: process.env.NODEMAILER_USER || 'devcommunity43@gmail.com',
+    pass: process.env.NODEMAILER_PASSWORD||'irzk bufw qdud dedh',
   },
 });
 
