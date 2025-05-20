@@ -14,6 +14,16 @@ class QuestionObjectService {
             },
         });
     }
+    async addQuestions(surveyId, questions) {
+        return prisma_1.default.survey.update({
+            where: { id: surveyId },
+            data: {
+                questions: {
+                    push: questions,
+                },
+            },
+        });
+    }
     async getQuestions(surveyId) {
         const survey = await prisma_1.default.survey.findUnique({
             where: { id: surveyId },

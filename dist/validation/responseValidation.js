@@ -15,7 +15,10 @@ exports.createResponseSchema = joi_1.default.object({
         "string.email": "يجب أن يكون البريد الإلكتروني صالحاً",
         "any.required": "البريد الإلكتروني مطلوب",
     }),
-    answers: joi_1.default.object().required().messages({
+    answers: joi_1.default.object()
+        .pattern(joi_1.default.string(), joi_1.default.string().max(200))
+        .required()
+        .messages({
         "object.base": "Answers must be an object",
         "any.required": "Answers are required",
     }),

@@ -1,12 +1,14 @@
+
 // controllers/authController.ts
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import passport from "passport";
 import i18n from "../config/i18n";
 import { AuthService } from "../services/authService";
-import { signAccess, signRefresh, verifyRefresh } from "../utils/jwt.util";
-import { setLocale, sendResponse } from "../utils/response";
 import { JwtPayload } from "../types/global";
+import { signAccess, signRefresh, verifyRefresh } from "../utils/jwt.util";
+import { sendResponse, setLocale } from "../utils/response";
 import { User } from "@prisma/client";
+
 
 const cookieOptions = {
   httpOnly: true,
@@ -292,4 +294,36 @@ export class AuthController {
       next(e);
     }
   };
+   
+
+    deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const lang = setLocale(req);
+            const { id } = req.params;
+            const result = await this.authService.deleteUser(id, lang);
+            res.json(result);
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    updateUserRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const lang = setLocale(req);
+            const { id } = req.params;
+            const { role } = req.body;
+            const user = await this.authService.updateUserRole(id, role, lang);
+            res.json({
+                message: i18n.__("User role updated successfully"),
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role,
+                },
+            });
+        } catch (e) {
+            next(e);
+        }
+    };
 }

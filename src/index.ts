@@ -1,11 +1,23 @@
-import App from './app'
-import 'dotenv/config'
+import 'dotenv/config';
+import App from './app';
+import { AuthService } from './services/authService';
 
-const port = parseInt(process.env.PORT || '3000', 10)
+async function bootstrap() {
 
-const server = new App()
 
-server.listen(port).catch((error) => {
-  console.error('Failed to start the server:', error)
-  process.exit(1)
-})
+  
+    const { created } = await AuthService.createAdminUser('en');
+    console.log(
+      created ? '✅ Admin user created' : 'ℹ️ Admin user already exists'
+    );
+  
+
+  const port = parseInt(process.env.PORT || '3000', 10);
+  const server = new App();
+  await server.listen(port);
+}
+
+bootstrap().catch((error) => {
+  console.error('Failed to start the server:', error);
+  process.exit(1);
+});

@@ -33,9 +33,11 @@ class AuthController {
                 const lang = (0, response_1.setLocale)(req);
                 const { email, password, name } = req.body;
                 const { mailSent } = await this.authService.registerInit({ email, password, name }, lang);
-                res.status(202).json((0, response_1.sendResponse)(true, mailSent
+                res
+                    .status(202)
+                    .json((0, response_1.sendResponse)(true, mailSent
                     ? i18n_1.default.__("OTP sent to your email")
-                    : i18n_1.default.__("OTP created but email failed; please use /otp/resend"), null));
+                    : i18n_1.default.__("OTP created but email failed; please use /otp/resend")));
             }
             catch (e) {
                 next(e);
@@ -91,9 +93,7 @@ class AuthController {
                     role: user.role,
                 });
                 const refreshToken = (0, jwt_util_1.signRefresh)({ id: user.id });
-                res
-                    .cookie("refreshToken", refreshToken, cookieOptions)
-                    .json({
+                res.cookie("refreshToken", refreshToken, cookieOptions).json({
                     message: i18n_1.default.__("Logged in successfully"),
                     accessToken,
                     user: {
@@ -127,9 +127,9 @@ class AuthController {
         };
         this.logout = (_req, res) => {
             (0, response_1.setLocale)(_req);
-            res
-                .clearCookie("refreshToken", cookieOptions)
-                .json({ message: i18n_1.default.__("Logged out successfully") });
+            res.clearCookie("refreshToken", cookieOptions).json({
+                message: i18n_1.default.__("Logged out successfully"),
+            });
         };
         this.profile = async (req, res, next) => {
             try {
@@ -145,16 +145,16 @@ class AuthController {
         this.googleLogin = (req, res, next) => passport_1.default.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
         this.googleCallback = (req, res, next) => passport_1.default.authenticate("google", { session: false }, (err, user) => {
             if (err || !user)
-                return res.status(400).json({ message: i18n_1.default.__("Authentication failed") });
+                return res
+                    .status(400)
+                    .json({ message: i18n_1.default.__("Authentication failed") });
             const accessToken = (0, jwt_util_1.signAccess)({
                 id: user.id,
                 email: user.email,
                 role: user.role,
             });
             const refreshToken = (0, jwt_util_1.signRefresh)({ id: user.id });
-            res
-                .cookie("refreshToken", refreshToken, cookieOptions)
-                .json({
+            res.cookie("refreshToken", refreshToken, cookieOptions).json({
                 message: i18n_1.default.__("Logged in successfully with Google"),
                 accessToken,
                 user: {
@@ -177,9 +177,7 @@ class AuthController {
                 role: user.role,
             });
             const refreshToken = (0, jwt_util_1.signRefresh)({ id: user.id });
-            res
-                .cookie("refreshToken", refreshToken, cookieOptions)
-                .json({
+            res.cookie("refreshToken", refreshToken, cookieOptions).json({
                 message: i18n_1.default.__("Logged in successfully with GitHub"),
                 accessToken,
                 user: {
@@ -190,6 +188,32 @@ class AuthController {
                 },
             });
         })(req, res, next);
+        this.twitterLogin = (req, res, next) => {
+            passport_1.default.authenticate("twitter", { session: true })(req, res, next);
+        };
+        this.twitterCallback = (req, res, next) => {
+            passport_1.default.authenticate("twitter", { session: true }, async (err, user) => {
+                if (err || !user) {
+                    const errorDetails = err instanceof Error ? { message: err.message } : err;
+                    return res.status(500).json({
+                        message: i18n_1.default.__("Authentication failed"),
+                        error: errorDetails,
+                    });
+                }
+                const accessToken = (0, jwt_util_1.signAccess)({
+                    id: user.id,
+                    email: user.email,
+                    role: user.role,
+                });
+                const refreshToken = (0, jwt_util_1.signRefresh)({ id: user.id });
+                res.cookie("refreshToken", refreshToken, cookieOptions);
+                res.json({
+                    message: i18n_1.default.__("Logged in successfully with Twitter"),
+                    accessToken,
+                    user,
+                });
+            })(req, res, next);
+        };
         this.resetPassword = async (req, res, next) => {
             try {
                 (0, response_1.setLocale)(req);
@@ -200,11 +224,44 @@ class AuthController {
                     return;
                 }
                 if (!newPassword) {
-                    res.status(400).json({ message: i18n_1.default.__("Password is required") });
+                    res.status(400).json({
+                        message: i18n_1.default.__("Password is required"),
+                    });
                     return;
                 }
                 await this.authService.resetPassword(user.id, newPassword);
                 res.json({ message: i18n_1.default.__("Password reset successfully") });
+            }
+            catch (e) {
+                next(e);
+            }
+        };
+        this.deleteUser = async (req, res, next) => {
+            try {
+                const lang = (0, response_1.setLocale)(req);
+                const { id } = req.params;
+                const result = await this.authService.deleteUser(id, lang);
+                res.json(result);
+            }
+            catch (e) {
+                next(e);
+            }
+        };
+        this.updateUserRole = async (req, res, next) => {
+            try {
+                const lang = (0, response_1.setLocale)(req);
+                const { id } = req.params;
+                const { role } = req.body;
+                const user = await this.authService.updateUserRole(id, role, lang);
+                res.json({
+                    message: i18n_1.default.__("User role updated successfully"),
+                    user: {
+                        id: user.id,
+                        email: user.email,
+                        name: user.name,
+                        role: user.role,
+                    },
+                });
             }
             catch (e) {
                 next(e);

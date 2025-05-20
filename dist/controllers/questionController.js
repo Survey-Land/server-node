@@ -11,8 +11,11 @@ class QuestionObjectController {
             try {
                 (0, response_1.setLocale)(req);
                 const { surveyId } = req.params;
-                const question = { ...req.body, qid: (0, uuid_1.v4)() };
-                const updatedSurvey = await this.service.addQuestion(surveyId, question);
+                const questions = req.body.questions.map((q) => ({
+                    ...q,
+                    qid: (0, uuid_1.v4)(),
+                }));
+                const updatedSurvey = await this.service.addQuestions(surveyId, questions);
                 res.status(201).json((0, response_1.sendResponse)(true, "Question added successfully", updatedSurvey));
             }
             catch (e) {
