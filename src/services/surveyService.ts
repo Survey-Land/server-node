@@ -108,37 +108,50 @@ export class SurveyService {
     }
 
     // This Function is used to update a survey by id
-    async updateSurvey(id: string, lang: string, data: any) {
-        i18n.setLocale(lang);
-        try {
-            const existingSurvey = await prisma.survey.findUnique({
-                where: { id },
-            });
-            if (!existingSurvey) {
-                throw new CustomError(i18n.__("Survey not found"), 404);
-            }
-            const updatedSurveyData: any = {
-                ...existingSurvey,
-                ...data,
-            };
-            delete updatedSurveyData.id;
-            const updatedSurvey = await prisma.survey.update({
-                where: { id },
-                data: updatedSurveyData,
-            });
+   async updateSurvey(id: string, lang: string, data: any) {
+    i18n.setLocale(lang);
 
-            return updatedSurvey;
-        } catch (error) {
-            if (error instanceof CustomError) {
-                throw error;
-            } else {
-                throw new CustomError(
-                    i18n.__("An error occurred while updating the survey"),
-                    500
-                );
-            }
+    try {
+        const existingSurvey = await prisma.survey.findUnique({
+            where: { id },
+        });
+
+        if (!existingSurvey) {
+            throw new CustomError(i18n.__("Survey not found"), 404);
+        }
+
+        const updatedSurveyData: any = {
+            ...existingSurvey,
+            ...data,
+        };
+        if (Array.isArray(updatedSurveyData.questions)) {
+            updatedSurveyData.questions = {
+                set: updatedSurveyData.questions.map((q: any) => ({
+                    ...q,
+                    choices: Array.isArray(q.choices) ? q.choices : [],
+                })),
+            };
+        }
+        delete updatedSurveyData.id;
+        const updatedSurvey = await prisma.survey.update({
+            where: { id },
+            data: updatedSurveyData,
+        });
+
+        return updatedSurvey;
+
+    } catch (error) {
+        console.log(error);
+        if (error instanceof CustomError) {
+            throw error;
+        } else {
+            throw new CustomError(
+                i18n.__("An error occurred while updating the survey"),
+                500
+            );
         }
     }
+}
 
     async createLink(surveyId: string, lang: string) {
         i18n.setLocale(lang);
@@ -179,14 +192,12 @@ export class SurveyService {
         if (!survey) {
             throw new CustomError(i18n.__("Survey not found"), 404);
         }
+       
         if (survey.deadline !== null && survey.deadline < new Date()) {
             throw new CustomError(i18n.__("Survey is expired"), 400);
         }
 
-        return await prisma.survey.findUnique({
-            where: { id: surveyId },
-            include: {},
-        });
+        return survey;
     }
 
     async submitResponse(link: string, data: any) {
