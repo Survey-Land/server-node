@@ -54,5 +54,7 @@
 	"Account temporarily locked. Try again in 30 seconds.": "Account temporarily locked. Try again in 30 seconds.",
 	"Account temporarily locked. Check your email for OTP.": "Account temporarily locked. Check your email for OTP.",
 	"Survey is expired": "Survey is expired",
-	"only admin can edit": "only admin can edit"
+	"only admin can edit": "only admin can edit",
+	"user_not_found": "No user found with this email address.",
+	"email_already_verified": "This email address has already been verified."
 }

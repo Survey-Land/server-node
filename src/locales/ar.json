@@ -56,5 +56,7 @@
   "Account temporarily locked. Try again later.": "Account temporarily locked. Try again later.",
   "Account temporarily locked. Try again in 30 seconds.": "Account temporarily locked. Try again in 30 seconds.",
   "Account temporarily locked. Check your email for OTP.": "Account temporarily locked. Check your email for OTP.",
-  "Survey is expired": "الاستبيان منتهي"
+  "Survey is expired": "الاستبيان منتهي",
+   "user_not_found": "لم يتم العثور على مستخدم بهذا البريد الإلكتروني.",
+  "email_already_verified": "تم تفعيل هذا البريد الإلكتروني مسبقًا."
 }

@@ -43,15 +43,12 @@ export class AuthService {
 
     const user = await prisma.user.findUnique({ where: { email } });
 
-  // ✅ check user credentials
-  if (!user || !user.password || user.isEmailVerified === false) {
-    throw new CustomError(i18n.__("Incorrect email or password"), 400);
-  }
-
+    if (!user || !user.password || user.isEmailVerified === false) {
+      throw new CustomError(i18n.__("Incorrect email or password"), 400);
+    }
 
     const now = new Date();
 
-    // ✅ check if account is locked
     if (user.lockUntil && user.lockUntil > now) {
       throw new CustomError(
         i18n.__("Account temporarily locked. Try again later."),
@@ -82,12 +79,13 @@ export class AuthService {
         );
       } else if (failedAttempts > 3) {
         lockUntil = new Date(Date.now() + 15 * 60 * 1000);
-        
+
         await sendOtpEmail(
           email,
           i18n.__("OTP resent to your email"),
           generateOtp().toString(),
-          i18n.__("valid for %s minutes", "5")
+          i18n.__("valid for %s minutes", "5"),
+          lang as "ar" | "en"
         );
 
         throw new CustomError(
@@ -131,7 +129,7 @@ export class AuthService {
     const otpPlain = generateOtp().toString();
     const otpHash = await hashOtp(otpPlain);
     const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing)
+    if (existing?.isEmailVerified)
       throw new Error(i18n.__("Email already in use"));
     const user =
       existing ??
@@ -141,7 +139,6 @@ export class AuthService {
           name,
           password: hashedPw,
           provider: "local",
-          // role: "user",
           isEmailVerified: false,
         },
       }));
@@ -155,7 +152,8 @@ export class AuthService {
         email,
         i18n.__("Verify your email"),
         otpPlain,
-        i18n.__("valid for %s minutes", "5")
+        i18n.__("valid for %s minutes", "5"),
+        lang as "ar" | "en"
       );
       return { user, mailSent: true };
     } catch (err) {
@@ -169,7 +167,7 @@ export class AuthService {
     lang: string
   ) {
     i18n.setLocale(lang);
-    return prisma.$transaction(async (tx:any) => {
+    return prisma.$transaction(async (tx: any) => {
       const otpRecord = await tx.oTP.findFirst({ where: { email } });
       if (!otpRecord)
         throw new Error(i18n.__("No OTP found, please request one"));
@@ -188,9 +186,11 @@ export class AuthService {
 
   async resendOtp(email: string, lang: string) {
     i18n.setLocale(lang);
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || user.isEmailVerified)
-      throw new Error(i18n.__("Invalid request"));
+     const user = await prisma.user.findUnique({ where: { email } });
+    if (!user)
+      throw new Error(i18n.__("user_not_found"));
+    if (user.isEmailVerified)
+      throw new Error(i18n.__("email_already_verified"));
     const otpPlain = generateOtp().toString();
     const otpHash = await hashOtp(otpPlain);
     await prisma.oTP.upsert({
@@ -203,7 +203,8 @@ export class AuthService {
         email,
         i18n.__("Verify your email"),
         otpPlain,
-        i18n.__("valid for %s minutes", "5")
+        i18n.__("valid for %s minutes", "5"),
+        lang as "ar" | "en"
       );
       return { mailSent: true };
     } catch (err) {
@@ -236,41 +237,38 @@ export class AuthService {
       data: { password: hashedPass },
     });
   }
-  static async createAdminUser(lang = 'en') {
+  static async createAdminUser(lang = "en") {
     i18n.setLocale(lang);
 
-    const email = 'admin@survey.com';
-    const password = '123456789';
+    const email = "admin@survey.com";
+    const password = "123456789";
     const hashedPw = await bcrypt.hash(password, 10);
 
     const existingAdmin = await prisma.user.findFirst({ where: { email } });
     if (existingAdmin) {
-      return { created: false };          
+      return { created: false };
     }
 
     await prisma.user.create({
       data: {
         email,
         password: hashedPw,
-        provider: 'local',
-        role: 'ADMIN',
+        provider: "local",
+        role: "ADMIN",
         isEmailVerified: true,
       },
     });
 
-    return { created: true };           
+    return { created: true };
   }
-
 
   async deleteUser(id: string, lang: string) {
     i18n.setLocale(lang);
     const user = await prisma.user.findUnique({ where: { id } });
-    
+
     if (!user) {
       throw new CustomError(i18n.__("User not found"), 404);
     }
-
-   
 
     await prisma.user.delete({ where: { id } });
     return { message: i18n.__("User deleted successfully") };
@@ -279,12 +277,10 @@ export class AuthService {
   async updateUserRole(id: string, role: string, lang: string) {
     i18n.setLocale(lang);
     const user = await prisma.user.findUnique({ where: { id } });
-    
+
     if (!user) {
       throw new CustomError(i18n.__("User not found"), 404);
     }
-
-
 
     const updatedUser = await prisma.user.update({
       where: { id },
@@ -293,5 +289,4 @@ export class AuthService {
 
     return updatedUser;
   }
-
 }

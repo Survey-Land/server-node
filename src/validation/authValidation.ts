@@ -17,7 +17,7 @@ export const registerSchema = Joi.object({
 
 export const loginSchema = Joi.object({
   email: Joi.string().email().required(),
-  password: Joi.string().pattern(new RegExp(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,14}$/)).message("كلمة المرور يجب أن تتكون من 8 إلى 14 حرفًا، وتحتوي على حروف وأرقام").required()
+  password: Joi.string().required()
 });
 
 

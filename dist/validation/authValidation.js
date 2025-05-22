@@ -21,7 +21,7 @@ exports.registerSchema = joi_1.default.object({
 });
 exports.loginSchema = joi_1.default.object({
     email: joi_1.default.string().email().required(),
-    password: joi_1.default.string().pattern(new RegExp(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,14}$/)).message("كلمة المرور يجب أن تتكون من 8 إلى 14 حرفًا، وتحتوي على حروف وأرقام").required()
+    password: joi_1.default.string().required()
 });
 exports.adminCreateSchema = joi_1.default.object({
     email: joi_1.default.string()

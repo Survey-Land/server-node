@@ -115,7 +115,7 @@ export default class ResponseService {
     }
   }
   
-  async checkSurveyMilestone(id: string) {
+  async checkSurveyMilestone(id: string, lang: string) {
     try {
       const responseCount = await prisma.response.count({where: {surveyId: id }});
       if(responseCount % 10 !== 0 || responseCount === 0) return;
@@ -126,7 +126,7 @@ export default class ResponseService {
       const user = await prisma.user.findUnique({where: {id: userId}});
       if (!user) return;
       const subject = "Survey Responses Notification";
-      await sendNotificationEmail(user.email, subject, user.name || 'User', survey.title, responseCount);
+      await sendNotificationEmail(user.email, subject, user.name || 'User', survey.title, responseCount, lang);
       await prisma.survey.update({
         where: { id },
         data: {

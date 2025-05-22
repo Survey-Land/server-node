@@ -43,12 +43,10 @@ class AuthService {
     async login(email, password, lang) {
         i18n_1.default.setLocale(lang);
         const user = await prisma_1.default.user.findUnique({ where: { email } });
-        // ✅ check user credentials
         if (!user || !user.password || user.isEmailVerified === false) {
             throw new custom_error_1.CustomError(i18n_1.default.__("Incorrect email or password"), 400);
         }
         const now = new Date();
-        // ✅ check if account is locked
         if (user.lockUntil && user.lockUntil > now) {
             throw new custom_error_1.CustomError(i18n_1.default.__("Account temporarily locked. Try again later."), 423);
         }
@@ -68,7 +66,7 @@ class AuthService {
             }
             else if (failedAttempts > 3) {
                 lockUntil = new Date(Date.now() + 15 * 60 * 1000);
-                await (0, emailService_1.sendOtpEmail)(email, i18n_1.default.__("OTP resent to your email"), (0, otp_generation_1.generateOtp)().toString(), i18n_1.default.__("valid for %s minutes", "5"));
+                await (0, emailService_1.sendOtpEmail)(email, i18n_1.default.__("OTP resent to your email"), (0, otp_generation_1.generateOtp)().toString(), i18n_1.default.__("valid for %s minutes", "5"), lang);
                 throw new custom_error_1.CustomError(i18n_1.default.__("Account temporarily locked. Check your email for OTP."), 423);
             }
             await prisma_1.default.user.update({
@@ -95,7 +93,7 @@ class AuthService {
         const otpPlain = (0, otp_generation_1.generateOtp)().toString();
         const otpHash = await (0, otp_generation_1.hashOtp)(otpPlain);
         const existing = await prisma_1.default.user.findUnique({ where: { email } });
-        if (existing)
+        if (existing?.isEmailVerified)
             throw new Error(i18n_1.default.__("Email already in use"));
         const user = existing ??
             (await prisma_1.default.user.create({
@@ -104,7 +102,6 @@ class AuthService {
                     name,
                     password: hashedPw,
                     provider: "local",
-                    // role: "user",
                     isEmailVerified: false,
                 },
             }));
@@ -114,7 +111,7 @@ class AuthService {
             create: { email, otpHash, expiresAt: (0, otp_generation_1.getExpiry)(5) },
         });
         try {
-            await (0, emailService_1.sendOtpEmail)(email, i18n_1.default.__("Verify your email"), otpPlain, i18n_1.default.__("valid for %s minutes", "5"));
+            await (0, emailService_1.sendOtpEmail)(email, i18n_1.default.__("Verify your email"), otpPlain, i18n_1.default.__("valid for %s minutes", "5"), lang);
             return { user, mailSent: true };
         }
         catch (err) {
@@ -144,8 +141,10 @@ class AuthService {
     async resendOtp(email, lang) {
         i18n_1.default.setLocale(lang);
         const user = await prisma_1.default.user.findUnique({ where: { email } });
-        if (!user || user.isEmailVerified)
-            throw new Error(i18n_1.default.__("Invalid request"));
+        if (!user)
+            throw new Error(i18n_1.default.__("user_not_found"));
+        if (user.isEmailVerified)
+            throw new Error(i18n_1.default.__("email_already_verified"));
         const otpPlain = (0, otp_generation_1.generateOtp)().toString();
         const otpHash = await (0, otp_generation_1.hashOtp)(otpPlain);
         await prisma_1.default.oTP.upsert({
@@ -154,7 +153,7 @@ class AuthService {
             create: { email, otpHash, expiresAt: (0, otp_generation_1.getExpiry)(5) },
         });
         try {
-            await (0, emailService_1.sendOtpEmail)(email, i18n_1.default.__("Verify your email"), otpPlain, i18n_1.default.__("valid for %s minutes", "5"));
+            await (0, emailService_1.sendOtpEmail)(email, i18n_1.default.__("Verify your email"), otpPlain, i18n_1.default.__("valid for %s minutes", "5"), lang);
             return { mailSent: true };
         }
         catch (err) {
@@ -187,10 +186,10 @@ class AuthService {
             data: { password: hashedPass },
         });
     }
-    static async createAdminUser(lang = 'en') {
+    static async createAdminUser(lang = "en") {
         i18n_1.default.setLocale(lang);
-        const email = 'admin@survey.com';
-        const password = '123456789';
+        const email = "admin@survey.com";
+        const password = "123456789";
         const hashedPw = await bcrypt_1.default.hash(password, 10);
         const existingAdmin = await prisma_1.default.user.findFirst({ where: { email } });
         if (existingAdmin) {
@@ -200,8 +199,8 @@ class AuthService {
             data: {
                 email,
                 password: hashedPw,
-                provider: 'local',
-                role: 'ADMIN',
+                provider: "local",
+                role: "ADMIN",
                 isEmailVerified: true,
             },
         });

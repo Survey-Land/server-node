@@ -42,7 +42,7 @@ export class ResponseController {
   };
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      setLocale(req);
+      const lang = setLocale(req);
       const { surveyId, ...restData } = req.body;
 
       const isSurveyIdExisted = await prisma?.survey.findUnique({
@@ -62,7 +62,7 @@ export class ResponseController {
       };
 
       const createdResponse = await this.responseService.create(newResponse);
-      await this.responseService.checkSurveyMilestone(surveyId);
+      await this.responseService.checkSurveyMilestone(surveyId,lang);
       res
         .status(201)
         .json(
