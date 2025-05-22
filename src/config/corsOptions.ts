@@ -1,9 +1,10 @@
-import cors from 'cors'
+import cors from "cors";
 const corsOptions: cors.CorsOptions = {
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Specify which methods are allowed
-  allowedHeaders: ['Content-Type', 'Authorization'], // Specify which headers are allowed
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], // Specify which methods are allowed
+  allowedHeaders: ["Content-Type", "Authorization", "Accept-Language"], // Specify which headers are allowed
   credentials: true, // Allow credentials (cookies, authorization headers, etc.)
-}
+  exposedHeaders: ["accept-language"],
+};
 
-export default corsOptions
+export default corsOptions;
