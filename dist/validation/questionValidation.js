@@ -36,12 +36,12 @@ const singleQuestionSchema = joi_1.default.object({
 exports.createQuestionSchema = joi_1.default.object({
     questions: joi_1.default.array()
         .items(singleQuestionSchema)
-        .min(2)
+        .min(1)
         .max(20)
         .required()
         .messages({
         "array.base": "Questions should be an array of question objects",
-        "array.min": "You must provide at least 2 questions",
+        "array.min": "You must provide at least 1 questions",
         "array.max": "You can provide a maximum of 20 questions",
     }),
 });

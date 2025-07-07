@@ -27,28 +27,26 @@ export class QuestionObjectService {
     });
     return survey?.questions || [];
   }
+async updateQuestion(surveyId: string, qid: string, updatedQuestion: QuestionObject) {
+  const survey = await prisma.survey.findUnique({ where: { id: surveyId } });
 
-  async updateQuestion(surveyId: string, qid: string, updatedQuestion: QuestionObject) {
-    const survey = await prisma.survey.findUnique({ where: { id: surveyId } });
+  if (!survey) throw new Error("Survey not found");
 
-    if (!survey) throw new Error("Survey not found");
+  const cleanedQid = qid.trim();
 
-    const updatedQuestions = survey.questions.map((q) => {
-      const question: QuestionObject = {
-        qid: q.qid,
-        questionText: q.questionText,
-        type: q.type as QuestionObject["type"],
-        choices: q.choices,
-        isRequired: q.isRequired,
-      };
-      return question.qid === qid ? updatedQuestion : question;
-    });
+  const updatedQuestions = survey.questions.map((q) => {
+    if (q.qid === cleanedQid) {
+      return { ...q, ...updatedQuestion, qid: q.qid };
+    }
+    return q;
+  });
 
-    return prisma.survey.update({
-      where: { id: surveyId },
-      data: { questions: updatedQuestions },
-    });
-  }
+  return prisma.survey.update({
+    where: { id: surveyId },
+    data: { questions: updatedQuestions },
+  });
+}
+
 
   async deleteQuestion(surveyId: string, qid: string) {
     const survey = await prisma.survey.findUnique({ where: { id: surveyId } });

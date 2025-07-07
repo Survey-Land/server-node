@@ -35,15 +35,12 @@ class QuestionObjectService {
         const survey = await prisma_1.default.survey.findUnique({ where: { id: surveyId } });
         if (!survey)
             throw new Error("Survey not found");
+        const cleanedQid = qid.trim();
         const updatedQuestions = survey.questions.map((q) => {
-            const question = {
-                qid: q.qid,
-                questionText: q.questionText,
-                type: q.type,
-                choices: q.choices,
-                isRequired: q.isRequired,
-            };
-            return question.qid === qid ? updatedQuestion : question;
+            if (q.qid === cleanedQid) {
+                return { ...q, ...updatedQuestion, qid: q.qid };
+            }
+            return q;
         });
         return prisma_1.default.survey.update({
             where: { id: surveyId },

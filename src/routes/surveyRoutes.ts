@@ -7,7 +7,6 @@ import {
 import { validate } from "../middleware/validateMiddleware";
 import { authenticateJWT } from "../middleware/authMiddleware";
 import uploadFiles from "../middleware/uploadFiles";
-import { checkSurveyEditable } from "../middleware/checkSurveyEditable";
 
 const router = Router();
 const controller = new SurveyController();
@@ -27,7 +26,7 @@ router.post(
 router.put(
   "/:id",
   authenticateJWT,
-  checkSurveyEditable,
+  
   validate(updateSurveySchema),
   controller.update
 );
